@@ -39,6 +39,7 @@
         </service>
 
         <activity android:name=".MapLocationViewer"
+            android:theme="@style/Theme.AppCompat.Light"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -47,6 +48,7 @@
         </activity>
 
         <activity android:name=".MapAutoIncubating"
+            android:theme="@style/Theme.AppCompat.Light"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

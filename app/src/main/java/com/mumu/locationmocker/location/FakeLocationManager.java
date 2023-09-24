@@ -171,6 +171,7 @@ public class FakeLocationManager {
                 mUpdateThread.interrupt();
             }
             mKeepUpdating = false;
+            setMockDisable();
         }
     }
 
@@ -213,6 +214,22 @@ public class FakeLocationManager {
         }
 
         mCurrentFakeLocation = fakeLocation;
+    }
+
+    private void setMockDisable() {
+        try {
+            String[] providers = {GPS_PROVIDER, NETWORK_PROVIDER, FUSED_PROVIDER};
+            Location mockLocation;
+
+            for(String provider : providers) {
+                mLocationManager.addTestProvider(provider, false, false, false,
+                        false, false, true, true,
+                        ProviderProperties.POWER_USAGE_LOW, ProviderProperties.ACCURACY_FINE);
+                mLocationManager.setTestProviderEnabled(provider, false);
+            }
+        }  catch (IllegalArgumentException e) {
+            Log.d(TAG, "set mock location failed: " + e.getLocalizedMessage());
+        }
     }
 
     private void commitCurrentLocation() {
