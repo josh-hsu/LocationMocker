@@ -1,0 +1,4 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:drawable="@drawable/circle_yellow_48px" android:width="44px" android:height="44px" android:gravity="center_horizontal|center_vertical"/>
+  <item android:drawable="@drawable/circle_yellow_bright_48px" android:width="52px" android:height="52px" android:gravity="center_horizontal|center_vertical"/>
+</layer-list>

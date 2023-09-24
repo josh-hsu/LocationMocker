@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_teleport"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_map_teleport"
+        android:title="@string/menu_teleport"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/action_finish"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_map_navigation"
+        android:title="@string/menu_navigate"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/action_cancel"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_map_cancel"
+        android:title="@string/menu_cancel"
+        app:showAsAction="ifRoom"/>
+
+</menu>
