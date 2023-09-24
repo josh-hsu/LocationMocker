@@ -16,10 +16,16 @@
 
 package com.mumu.locationmocker.location;
 
+import static android.location.LocationManager.FUSED_PROVIDER;
+import static android.location.LocationManager.GPS_PROVIDER;
+import static android.location.LocationManager.NETWORK_PROVIDER;
+import static android.location.LocationManager.PASSIVE_PROVIDER;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.location.provider.ProviderProperties;
 import android.os.SystemClock;
 import android.util.Log;
@@ -32,6 +38,7 @@ public class FakeLocationManager {
     private double mCurrentLong = 121.5642;
     private double mCurrentAlt = 10.2;
     private double mCurrentAccuracy = 6.91;
+    private FakeLocation mCurrentFakeLocation;
     private double mAutoLat = -1;
     private double mAutoLong = -1;
     private static final double mPaceLat = 0.000038;
@@ -40,14 +47,21 @@ public class FakeLocationManager {
     private static double mPaceLongShift = 0.000001;
     private static double mSpeed = 1;
     private static boolean mIsAutoPilot = false;
-    private static boolean mIsAutoPilotInterruptible = true;
+    private static boolean mIsAutoPilotInterrupter = true;
     private OnNavigationCompleteListener mOnNavigationCompleteListener = null;
+    private static FakeLocationManager mSelf;
+    LocationManager mLocationManager;
+
+    private LocationUpdater mUpdateThread;
+    private boolean mKeepUpdating = false;
 
     public FakeLocationManager(Context context, FakeLocation defaultLoc) {
         FakeLocation defaultLocation;
         mContext = context;
+        mCurrentFakeLocation = new FakeLocation(mCurrentLat, mCurrentLong, mCurrentAlt, mCurrentAccuracy);
 
         // Start fetch information from framework hacking
+        mLocationManager = (LocationManager)mContext.getSystemService(Context.LOCATION_SERVICE);
         boolean shouldUseLastLocation = initLastLocation();
 
         if (defaultLoc != null) {
@@ -60,58 +74,45 @@ public class FakeLocationManager {
 
         // Override location now, maybe in the future we should restore actual location
         setDefaultLocation(defaultLocation);
+
+        mSelf = this;
     }
 
-    //TODO: fix
     private boolean initLastLocation() {
-        boolean oldDataConsist = true;
-        String currentLat = "25.0335";
-        String currentLong = "121.5642";
-        String currentAlt = "11.0";
+        LocationManager lm = (LocationManager)mContext.getSystemService(Context.LOCATION_SERVICE);
+        String networkProvider = LocationManager.NETWORK_PROVIDER;
 
-        if (!currentLat.equals("")) {
-            mCurrentLat = Double.parseDouble(currentLat);
-        } else {
-            oldDataConsist = false;
+        if (lm == null) {
+            Log.e(TAG, "Mock Location Provider is null");
+            return false;
         }
+        @SuppressLint("MissingPermission") Location gpsLastLocation = lm.getLastKnownLocation(GPS_PROVIDER);
+        @SuppressLint("MissingPermission") Location networkLastLocation = lm.getLastKnownLocation(networkProvider);
 
-        if (!currentLong.equals("")) {
-            mCurrentLong = Double.parseDouble(currentLong);
-        } else {
-            oldDataConsist = false;
+        if (gpsLastLocation != null) {
+            Log.d(TAG, "gps " + gpsLastLocation);
+            setMockLocation(gpsLastLocation);
+            Toast.makeText(mContext, "Apply GPS location", Toast.LENGTH_SHORT).show();
         }
-
-        if (!currentAlt.equals("")) {
-            mCurrentAlt = Double.parseDouble(currentAlt);
+        if (networkLastLocation != null) {
+            Log.d(TAG, "net: " + networkLastLocation);
+            setMockLocation(networkLastLocation);
+            Toast.makeText(mContext, "Apply network location", Toast.LENGTH_SHORT).show();
         }
-
-        Log.d(TAG, "default: lat = " + mCurrentLat + ", long = " + mCurrentLong + ", alt = " + mCurrentAlt);
-        return oldDataConsist;
+        return true;
     }
 
     public FakeLocation getCurrentLocation() {
-        return new FakeLocation(mCurrentLat, mCurrentLong, mCurrentAlt, mCurrentAccuracy);
+        return mCurrentFakeLocation;
     }
 
     //TODO: fix
     public static FakeLocation getCurrentLocationStatic() {
-        String currentLat = "25.0335";
-        String currentLong = "121.5642";
-        double lat, lng;
-
-        if (!currentLat.equals("")) {
-            lat = Double.parseDouble(currentLat);
-        } else {
-            lat = 25.0335;
-        }
-
-        if (!currentLong.equals("")) {
-            lng = Double.parseDouble(currentLong);
-        } else {
-            lng = 121.5642;
-        }
-
-        return new FakeLocation(lat, lng, 2.0, 10.4);
+        FakeLocation defaultLocation = new FakeLocation(25.0335, 121.5642, 2.0, 10.4);
+        if (mSelf != null)
+            return mSelf.getCurrentLocation();
+        else
+            return defaultLocation;
     }
 
     public double getDistance(FakeLocation start, FakeLocation end) {
@@ -159,9 +160,17 @@ public class FakeLocationManager {
     // Setters
     public void setEnable(boolean enable) {
         if (enable) {
-            //mProperty.setSystemProperty(mContext.getString(R.string.intent_enable), "1");
+            if (mUpdateThread != null) {
+                mUpdateThread.interrupt();
+            }
+            mKeepUpdating = true;
+            mUpdateThread = new LocationUpdater(this);
+            mUpdateThread.start();
         } else {
-            //mProperty.setSystemProperty(mContext.getString(R.string.intent_enable), "0");
+            if (mUpdateThread != null) {
+                mUpdateThread.interrupt();
+            }
+            mKeepUpdating = false;
         }
     }
 
@@ -173,32 +182,37 @@ public class FakeLocationManager {
         }
     }
 
+    private void setMockLocation(Location location) {
+        FakeLocation fakeLocation = new FakeLocation(location.getLatitude(), location.getLongitude(),
+                location.getAltitude(), location.getAccuracy());
+        setLocation(fakeLocation);
+    }
+
     private void setMockLocation(FakeLocation fakeLocation) {
-        LocationManager lm = (LocationManager)mContext.getSystemService(Context.LOCATION_SERVICE);
-        Criteria criteria = new Criteria();
-        criteria.setAccuracy( Criteria.ACCURACY_FINE );
+        try {
+            String[] providers = {GPS_PROVIDER, NETWORK_PROVIDER, FUSED_PROVIDER};
+            Location mockLocation;
 
-        String mocLocationProvider = LocationManager.GPS_PROVIDER;//lm.getBestProvider( criteria, true );
+            for(String provider : providers) {
+                mLocationManager.addTestProvider(provider, false, false, false,
+                        false, false, true, true,
+                        ProviderProperties.POWER_USAGE_LOW, ProviderProperties.ACCURACY_FINE);
+                mLocationManager.setTestProviderEnabled(provider, true);
 
-        if ( mocLocationProvider == null ) {
-            Toast.makeText(mContext, "No location provider found!", Toast.LENGTH_SHORT).show();
-            return;
+                mockLocation = new Location(provider);
+                mockLocation.setLatitude(fakeLocation.latitude);
+                mockLocation.setLongitude(fakeLocation.longitude);
+                mockLocation.setAltitude(fakeLocation.altitude);
+                mockLocation.setTime(System.currentTimeMillis());
+                mockLocation.setAccuracy(1);
+                mockLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
+                mLocationManager.setTestProviderLocation(provider, mockLocation);
+            }
+        }  catch (IllegalArgumentException e) {
+            Log.d(TAG, "set mock location failed: " + e.getLocalizedMessage());
         }
-        lm.addTestProvider(mocLocationProvider, false, false,
-                false, false, true, true, true,
-                ProviderProperties.POWER_USAGE_LOW, ProviderProperties.ACCURACY_FINE);
-        lm.setTestProviderEnabled(mocLocationProvider, true);
 
-        Location loc = new Location(mocLocationProvider);
-        Location mockLocation = new Location(mocLocationProvider); // a string
-        mockLocation.setLatitude(fakeLocation.latitude);  // double
-        mockLocation.setLongitude(fakeLocation.longitude);
-        mockLocation.setAltitude(fakeLocation.altitude);
-        mockLocation.setTime(System.currentTimeMillis());
-        mockLocation.setAccuracy(1);
-        mockLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
-        lm.setTestProviderLocation( mocLocationProvider, mockLocation);
-        Toast.makeText(mContext, "Working", Toast.LENGTH_SHORT).show();
+        mCurrentFakeLocation = fakeLocation;
     }
 
     private void commitCurrentLocation() {
@@ -230,7 +244,7 @@ public class FakeLocationManager {
     // main functions
     public void autoPilotTo(double targetLat, double targetLong, boolean interruptible) {
         mIsAutoPilot = true;
-        mIsAutoPilotInterruptible = interruptible;
+        mIsAutoPilotInterrupter = interruptible;
         mAutoLat = targetLat;
         mAutoLong = targetLong;
         new AutoPilotThread().start();
@@ -252,7 +266,7 @@ public class FakeLocationManager {
         }
 
         // if auto pilot is on going, cancel it if interruptible
-        if (mIsAutoPilot && mIsAutoPilotInterruptible) {
+        if (mIsAutoPilot && mIsAutoPilotInterrupter) {
             Log.w(TAG, "Auto pilot is in progress, cancel auto pilot first");
             mIsAutoPilot = false;
         }
@@ -324,6 +338,26 @@ public class FakeLocationManager {
 
         if (mCurrentAccuracy > 9.9 || mCurrentAccuracy < 1.5)
             mCurrentAccuracy = 5.2;
+    }
+
+    private class LocationUpdater extends Thread {
+        private FakeLocationManager flm;
+
+        public LocationUpdater(FakeLocationManager m) {
+            flm = m;
+        }
+        @Override
+        public void run() {
+            while (mKeepUpdating) {
+                flm.commitCurrentLocation();
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    mKeepUpdating = false;
+                    return;
+                }
+            }
+        }
     }
 
     // Threading runnable

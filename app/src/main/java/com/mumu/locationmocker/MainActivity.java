@@ -2,6 +2,7 @@ package com.mumu.locationmocker;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import android.content.Context;
 import android.content.Intent;
@@ -89,12 +90,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestPermissions() {
-        String[] perms = {"android.permission.WRITE_EXTERNAL_STORAGE"};
-        int permsRequestCode = 200;
-
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-            Log.d(TAG, "This is device software version above Marshmallow, requesting permission of external storage");
-            requestPermissions(perms, permsRequestCode);
+        if (ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}, 200);
         }
     }
 

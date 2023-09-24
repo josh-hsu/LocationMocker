@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
@@ -44,6 +45,7 @@ public class HeadService extends Service {
     private static final String TAG = "PokemonGoGo";
     private final Handler mHandler = new Handler();
     private FakeLocationManager mFakeLocationManager;
+    private LocationPoller mLocationPoller;
     public static final String ACTION_HANDLE_NAVIGATION = "ActionNavigation";
     public static final String ACTION_HANDLE_TELEPORT = "ActionTeleport";
     public static final String ACTION_HANDLE_INCUBATING = "ActionIncubating";
@@ -117,6 +119,19 @@ public class HeadService extends Service {
 
         // Set enable
         mFakeLocationManager.setEnable(true);
+
+        mLocationPoller = new LocationPoller(mContext);
+        mLocationPoller.startPolling(new LocationPoller.LocationCallback() {
+            @Override
+            public void onNewLocation(Location location) {
+                Log.d(TAG, "new location " + location);
+            }
+
+            @Override
+            public void onMoveDistance(float distance) {
+                mMessageText = "距離: " + distance + " 公尺";
+            }
+        });
     }
 
     private void initGamePanelViews() {
@@ -498,7 +513,7 @@ public class HeadService extends Service {
                     }
                 });
         AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         alert.show();
     }
 
