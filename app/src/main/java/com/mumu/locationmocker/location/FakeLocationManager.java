@@ -38,6 +38,7 @@ public class FakeLocationManager {
     private double mCurrentLong = 121.5642;
     private double mCurrentAlt = 10.2;
     private double mCurrentAccuracy = 6.91;
+    private float mCurrentBearing = 0.0f;
     private FakeLocation mCurrentFakeLocation;
     private double mAutoLat = -1;
     private double mAutoLong = -1;
@@ -185,7 +186,7 @@ public class FakeLocationManager {
 
     private void setMockLocation(Location location) {
         FakeLocation fakeLocation = new FakeLocation(location.getLatitude(), location.getLongitude(),
-                location.getAltitude(), location.getAccuracy());
+                location.getAltitude(), location.getAccuracy(), location.getBearing());
         setLocation(fakeLocation);
     }
 
@@ -204,6 +205,7 @@ public class FakeLocationManager {
                 mockLocation.setLatitude(fakeLocation.latitude);
                 mockLocation.setLongitude(fakeLocation.longitude);
                 mockLocation.setAltitude(fakeLocation.altitude);
+                mockLocation.setBearing(fakeLocation.bearing);
                 mockLocation.setTime(System.currentTimeMillis());
                 mockLocation.setAccuracy(1);
                 mockLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
@@ -233,7 +235,7 @@ public class FakeLocationManager {
     }
 
     private void commitCurrentLocation() {
-        FakeLocation fakeLocation = new FakeLocation(mCurrentLat, mCurrentLong, mCurrentAlt, mCurrentAccuracy);
+        FakeLocation fakeLocation = new FakeLocation(mCurrentLat, mCurrentLong, mCurrentAlt, mCurrentAccuracy, mCurrentBearing);
         setMockLocation(fakeLocation);
     }
 
@@ -243,7 +245,7 @@ public class FakeLocationManager {
         mCurrentLong = loc.longitude;
         mCurrentAlt = loc.altitude;
         mCurrentAccuracy = loc.accuracy;
-
+        mCurrentBearing = loc.bearing;
         setMockLocation(loc);
     }
 
@@ -343,9 +345,11 @@ public class FakeLocationManager {
         // shift is controlled to be within -0.000001 ~ 0.000001
         double shift = Math.random() / 1000000 - 0.0000005;
         double accShift = Math.random() * 2 - 1;
+        double bearShift = Math.random() * 10;
         mPaceLatShift = mPaceLatShift + shift;
         mPaceLongShift = mPaceLongShift + shift;
         mCurrentAccuracy += accShift;
+        mCurrentBearing += bearShift;
 
         if (mPaceLatShift > 0.000002 || mPaceLatShift < -0.000002)
             mPaceLatShift = 0.000001;
@@ -355,6 +359,10 @@ public class FakeLocationManager {
 
         if (mCurrentAccuracy > 9.9 || mCurrentAccuracy < 1.5)
             mCurrentAccuracy = 5.2;
+
+        if (mCurrentBearing > 10) {
+            mCurrentBearing = 0;
+        }
     }
 
     private class LocationUpdater extends Thread {
@@ -368,7 +376,7 @@ public class FakeLocationManager {
             while (mKeepUpdating) {
                 flm.commitCurrentLocation();
                 try {
-                    Thread.sleep(50);
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
                     mKeepUpdating = false;
                     return;

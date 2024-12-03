@@ -20,6 +20,7 @@ public class FakeLocation {
     public double latitude;
     public double longitude;
     public double altitude;
+    public float bearing;
     public double accuracy;
 
     public static final int NORTH = 0;
@@ -37,10 +38,19 @@ public class FakeLocation {
         longitude = lo;
         altitude = alt;
         accuracy = acc;
+        bearing = 0.0f;
+    }
+
+    public FakeLocation(double la, double lo, double alt, double acc, float br) {
+        latitude = la;
+        longitude = lo;
+        altitude = alt;
+        accuracy = acc;
+        bearing = br;
     }
 
     public String toString() {
         return "Latitude = " + latitude + ", longitude = " + longitude + ", altitude = " +
-                altitude + ", accuracy = " + accuracy;
+                altitude + ", accuracy = " + accuracy + ", bearing = " + bearing;
     }
 }
