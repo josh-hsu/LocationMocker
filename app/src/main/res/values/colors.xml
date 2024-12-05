@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#607d8b</color>
+    <color name="colorPrimaryDark">#34515e</color>
+    <color name="colorAccent">#8eacbb</color>
 
-    <color name="black_overlay">#66000000</color>
-    <color name="button_half_transparent">#70000000</color>
+    <color name="activityBackground">#e0e0e0</color>
+    <color name="highlightColor">#A5D6A7</color>
+
+    <color name="activate">#b3e5fc</color>
+    <color name="deactivate">#82b3c9</color>
+
+    <color name="error">#b00020</color>
+
+    <color name="colorDialogText">#001100</color>
+    <color name="colorDialogTextPrimary">#556655</color>
 </resources>

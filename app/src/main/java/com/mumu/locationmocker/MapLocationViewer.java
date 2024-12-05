@@ -12,11 +12,17 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
@@ -105,15 +111,12 @@ public class MapLocationViewer extends AppCompatActivity
     public void onLocationChanged(Location location) {
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
+        Log.d("LocationManager", "Lat: " + latitude + ", Long: " + longitude);
         LatLng latLng = new LatLng(latitude, longitude);
         if (mMap != null) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
         }
-    }
-
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
 
     }
 
@@ -151,6 +154,7 @@ public class MapLocationViewer extends AppCompatActivity
         mMap.setOnMapLongClickListener(mLocationSource);
 
         enableLocationUpdate();
+        enableFusedLocationUpdate();
         enableMyLocation();
     }
 
@@ -180,7 +184,44 @@ public class MapLocationViewer extends AppCompatActivity
         if (location != null) {
             onLocationChanged(location);
         }
-        locationManager.requestLocationUpdates(bestProvider, 20000, 0, this);
+        locationManager.requestLocationUpdates(bestProvider, 2000, 0, this);
+    }
+
+    private void enableFusedLocationUpdate() {
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, location -> {
+                    if (location != null) {
+                        // Use location data
+                        double latitude = location.getLatitude();
+                        double longitude = location.getLongitude();
+                        Log.d("FusedLocation", "Lat: " + latitude + ", Long: " + longitude);
+                    } else {
+                        Log.d("FusedLocation", "No last known location available");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FusedLocation", "Failed to get location: " + e.getMessage());
+                });
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setInterval(2000); // 10 seconds
+        locationRequest.setFastestInterval(1000); // 5 seconds
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        LocationCallback locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                for (Location location : locationResult.getLocations()) {
+                    // Use location data
+                    Log.d("FusedLocation", "Lat: " + location.getLatitude() + ", Long: " + location.getLongitude());
+                }
+            }
+        };
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+
     }
 
     @Override

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="battle_policy_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+    <string-array name="battle_eat_apple_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="script_create_action_def_values">
+        <item>click</item>
+        <item>doubleClick</item>
+        <item>multiClick</item>
+        <item>swipeLeft</item>
+        <item>swipeRight</item>
+        <item>swipeUp</item>
+        <item>swipeDown</item>
+        <item>stop</item>
+        <item>sleep</item>
+    </string-array>
+    <string-array name="script_create_action_amount_available_values">
+        <item>0</item>
+        <item>0</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="script_create_touch_shift_def_values">
+        <item>0x0</item>
+        <item>5x5</item>
+        <item>10x10</item>
+        <item>30x30</item>
+        <item>100x100</item>
+    </string-array>
+    <string-array name="script_create_sapa_interval_values">
+        <item>400</item>
+        <item>800</item>
+        <item>1000</item>
+        <item>1500</item>
+        <item>2000</item>
+        <item>5000</item>
+        <item>8000</item>
+    </string-array>
+    <string-array name="script_create_sapa_amb_values">
+        <item>0</item>
+        <item>3</item>
+        <item>6</item>
+        <item>9</item>
+        <item>12</item>
+        <item>15</item>
+        <item>18</item>
+        <item>25</item>
+        <item>30</item>
+    </string-array>
+    <string-array name="script_create_sapa_group_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="script_create_sapa_trigger_def_values">
+        <item>color</item>
+        <item>period</item>
+        <item>idle</item>
+    </string-array>
+    <string-array name="script_create_sapa_trigger_amount_available_values">
+        <item>0</item>
+        <item>1</item>
+        <item>1</item>
+    </string-array>
+</resources>

@@ -17,7 +17,6 @@ import android.widget.Button;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
-
     private static final String TAG = "PokemonGoGo";
     private Context mContext;
 
@@ -37,21 +36,36 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button mStartMapView;
+        mStartMapView = (Button)findViewById(R.id.buttonMapView);
+        mStartMapView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startMapView();
+            }
+        });
+
         requestPermissions();
     }
 
     @Override
     protected void onStop() {
 
-        Log.d("ZZ", "on onStop ++");
+        Log.d(TAG, "on onStop ++");
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Log.d("ZZ", "on onStop --");
+        Log.d(TAG, "on onStop --");
 
         super.onStop();
+    }
+
+    private void startMapView() {
+        Intent mapIntent = new Intent(mContext, MapLocationViewer.class);
+        mapIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(mapIntent);
     }
 
     private void startChatHeadService() {

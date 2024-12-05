@@ -86,7 +86,7 @@ public class MapAutoIncubating extends AppCompatActivity
         if (mMap != null) {
             mMap.clear();
             mMap.addCircle(new CircleOptions()
-                    .center(new LatLng(loc.latitude, loc.longitude))
+                    //.center(new LatLng(loc.latitude, loc.longitude))
                     .radius(radius)
                     .strokeColor(Color.RED));
             String radiusText = getString(R.string.map_radius) + radius + getString(R.string.map_radius_unit);

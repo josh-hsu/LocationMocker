@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    android:background="@drawable/rounded_bg_layout">
+
+    <ImageView
+        android:id="@+id/arrow_handle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/arrow_left_48px" />
+
+    <ScrollView
+        android:id="@+id/top_ui_scroll_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/arrow_handle">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_first"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:contentDescription="@string/app_name"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                android:padding="0dp"
+                android:textAllCaps="false"
+                android:textAppearance="@style/TextAppearance.AppCompat.Button"
+                app:cornerRadius="50dp"
+                app:icon="@drawable/ic_play"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="36dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_second"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:contentDescription="@string/app_name"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_toEndOf="@id/button_first"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                android:padding="0dp"
+                android:textAllCaps="false"
+                android:textAppearance="@style/TextAppearance.AppCompat.Button"
+                app:cornerRadius="50dp"
+                app:icon="@drawable/baseline_edit_note_24"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="36dp" />
+
+            <TextView
+                android:id="@+id/textview_progress_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="20dp"
+                android:layout_toEndOf="@+id/button_second"
+                android:text="|" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_third"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:contentDescription="@string/app_name"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_toEndOf="@id/textview_progress_time"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                android:padding="0dp"
+                android:textAllCaps="false"
+                android:textAppearance="@style/TextAppearance.AppCompat.Button"
+                app:cornerRadius="50dp"
+                app:icon="@drawable/ic_menu_home_outline"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="30dp" />
+
+            <TextView
+                android:id="@+id/textview_padding"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="20dp"
+                android:layout_toEndOf="@+id/button_third"
+                android:contentDescription="@string/app_name"
+                android:text=" " />
+
+            <TextView
+                android:id="@+id/textview_log_see"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/button_first"
+                android:maxLines="1"
+                android:paddingBottom="4dp"
+                android:text="" />
+
+            <TextView
+                android:id="@+id/textview_inst_first"
+                android:layout_width="58dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/button_first"
+                android:layout_marginStart="4dp"
+                android:maxLines="2"
+                android:paddingBottom="4dp"
+                android:gravity="center"
+                android:text="inst_first" />
+
+            <TextView
+                android:id="@+id/textview_inst_second"
+                android:layout_width="58dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/button_first"
+                android:layout_marginStart="2dp"
+                android:layout_toEndOf="@+id/textview_inst_first"
+                android:maxLines="2"
+                android:paddingBottom="4dp"
+                android:gravity="center"
+                android:text="inst_sec" />
+
+            <TextView
+                android:id="@+id/textview_inst_third"
+                android:layout_width="58dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/button_third"
+                android:layout_marginStart="12dp"
+                android:layout_toEndOf="@+id/textview_progress_time"
+                android:maxLines="2"
+                android:paddingBottom="4dp"
+                android:gravity="center"
+                android:text="inst_third" />
+        </RelativeLayout>
+    </ScrollView>
+</RelativeLayout>
