@@ -31,6 +31,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.mumu.locationmocker.service.HeadService;
 
 public class MapLocationViewer extends AppCompatActivity
         implements
@@ -111,7 +112,7 @@ public class MapLocationViewer extends AppCompatActivity
     public void onLocationChanged(Location location) {
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
-        Log.d("LocationManager", "Lat: " + latitude + ", Long: " + longitude);
+        Log.d(TAG, "Loc: Lat: " + latitude + ", Long: " + longitude);
         LatLng latLng = new LatLng(latitude, longitude);
         if (mMap != null) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
@@ -199,9 +200,9 @@ public class MapLocationViewer extends AppCompatActivity
                         // Use location data
                         double latitude = location.getLatitude();
                         double longitude = location.getLongitude();
-                        Log.d("FusedLocation", "Lat: " + latitude + ", Long: " + longitude);
+                        Log.d(TAG, "Fus: Lat: " + latitude + ", Long: " + longitude);
                     } else {
-                        Log.d("FusedLocation", "No last known location available");
+                        Log.d(TAG, "No last known location available");
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -216,7 +217,7 @@ public class MapLocationViewer extends AppCompatActivity
             public void onLocationResult(LocationResult locationResult) {
                 for (Location location : locationResult.getLocations()) {
                     // Use location data
-                    Log.d("FusedLocation", "Lat: " + location.getLatitude() + ", Long: " + location.getLongitude());
+                    Log.d(TAG, "Fus: Lat: " + location.getLatitude() + ", Long: " + location.getLongitude());
                 }
             }
         };

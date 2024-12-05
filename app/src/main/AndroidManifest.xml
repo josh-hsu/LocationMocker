@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".HeadService"
+        <service android:name=".service.HeadService"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

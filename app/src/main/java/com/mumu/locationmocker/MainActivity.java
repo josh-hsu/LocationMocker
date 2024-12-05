@@ -12,9 +12,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.mumu.locationmocker.service.HeadService;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "PokemonGoGo";
@@ -28,29 +29,22 @@ public class MainActivity extends AppCompatActivity {
         mContext = this;
 
         Button mStartServiceButton;
-        mStartServiceButton = (Button)findViewById(R.id.buttonStartService);
-        mStartServiceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startChatHeadService();
-            }
-        });
+        mStartServiceButton = findViewById(R.id.buttonStartService);
+        mStartServiceButton.setOnClickListener(view -> startChatHeadService());
 
         Button mStartMapView;
-        mStartMapView = (Button)findViewById(R.id.buttonMapView);
-        mStartMapView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startMapView();
-            }
-        });
+        mStartMapView = findViewById(R.id.buttonMapView);
+        mStartMapView.setOnClickListener(view -> startMapView());
+
+        Button mStartServiceButtonBtm;
+        mStartServiceButtonBtm = findViewById(R.id.buttonStartServiceBtm);
+        mStartServiceButtonBtm.setOnClickListener(view -> startChatHeadService());
 
         requestPermissions();
     }
 
     @Override
     protected void onStop() {
-
         Log.d(TAG, "on onStop ++");
         try {
             Thread.sleep(2000);
@@ -58,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         Log.d(TAG, "on onStop --");
-
         super.onStop();
     }
 
@@ -69,22 +62,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startChatHeadService() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            Toast.makeText(MainActivity.this, "Text", Toast.LENGTH_SHORT).show();
-            if (!Settings.canDrawOverlays(MainActivity.this)) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, 10);
-                Log.d(TAG, "No permission for drawing on screen, prompt one.");
+        Toast.makeText(MainActivity.this, "Text", Toast.LENGTH_SHORT).show();
+        if (!Settings.canDrawOverlays(MainActivity.this)) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            startActivityForResult(intent, 10);
+            Log.d(TAG, "No permission for drawing on screen, prompt one.");
 
-            } else {
-                Toast.makeText(MainActivity.this, "How to stop", Toast.LENGTH_SHORT).show();
-                startService(new Intent(mContext, HeadService.class));
-                returnHomeScreen();
-            }
         } else {
-            Log.d(TAG, "Permission granted, starting service.");
-            Toast.makeText(MainActivity.this, "stop", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "How to stop", Toast.LENGTH_SHORT).show();
             startService(new Intent(mContext, HeadService.class));
             returnHomeScreen();
         }

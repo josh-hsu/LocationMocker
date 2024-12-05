@@ -15,36 +15,19 @@
     <string name="banner_ad_unit_id">ca-app-pub-6206997118305400/3415399173</string>
     <string name="google_app_id">mu774-cdbb9</string>
 
-    <!-- Start up dialog -->
-    <string name="startup_title">Permissive SELinux</string>
-    <string name="startup_text">In order to use this app, we need to set SEPolicy to permissive.
-        Enabling permissive SEPolicy allows this APP to use whole file system. Do this at your own risk.</string>
-    <string name="startup_display_ok">We support your display size: </string>
-    <string name="startup_display_not_ok">We don\'t support your display size: </string>
-    <string name="startup_display_not_ok_help">You can visit https://github.com/josh-hsu/MU774 to help us supporting your display</string>
-
-    <!-- PointSelectionActivity -->
-    <string name="default_point_info">Point info will show in here</string>
-    <string name="title_activity_point_selection">Point Selection</string>
+    <!-- Activity -->
+    <string name="home_activity_start_service">Start Service</string>
+    <string name="home_activity_open_map">Open Map</string>
 
     <!-- HeadService -->
     <string name="walk_up_button">↑</string>
     <string name="walk_down_button">↓</string>
     <string name="walk_left_button">←</string>
     <string name="walk_right_button">→</string>
-
-    <!-- Preferences -->
-    <string name="stage_1">Normal Battle</string>
-    <string name="stage_2">Golden House</string>
-    <string name="stage_3">Dragon (Not ready)</string>
-    <string name="stage_4">Arena (Not ready)</string>
-
-    <!-- Properties -->
-    <string name="property_fake_enable">persist.asus.fakegps.enable</string>
-    <string name="property_fake_lat">persist.asus.fakegps.lat</string>
-    <string name="property_fake_long">persist.asus.fakegps.long</string>
-    <string name="property_fake_acc">persist.asus.fakegps.acc</string>
-    <string name="property_fake_alt">persist.asus.fakegps.alt</string>
+    <string name="topui_inst_first_play">Play!</string>
+    <string name="topui_inst_first_pause">Pause</string>
+    <string name="topui_inst_second">Speed\nConfig</string>
+    <string name="topui_inst_third">Open\nMap</string>
 
     <!-- Intent properties -->
     <string name="intent_enable">enable</string>
@@ -108,52 +91,10 @@
     <!-- Create Script ACC Service -->
     <string name="cs_acc_description">Auto Job Create Script needs your accessibility permissions to receive screen content to let you write your script. Screenshots are sensitive data, we do not collect or save your data without your consent. Please refer to our privacy policy.</string>
     <string name="cs_acc_summary">Auto Job Create Script</string>
-    <string name="cs_acc_screenshot_error_title">Screenshot Error</string>
-    <string name="cs_acc_screenshot_error_summary">Fail to get screenshot, please report this issue to developer using Issue Report in the menu.</string>
-    <string name="cs_acc_create_session_title">Create New Script</string>
-    <string name="cs_acc_create_session_summary">Please input the script name: </string>
-    <string name="cs_acc_create_session_hint">scriptname</string>
-    <string name="cs_acc_create_session_orientation">Orientation</string>
-    <string name="cs_acc_create_session_orientation_portrait">Portrait</string>
-    <string name="cs_acc_create_session_orientation_landscape">Landscape</string>
-    <string name="cs_acc_create_session_sapa">SAPA</string>
-    <string name="cs_acc_create_session_file_exist_title">File Exist</string>
-    <string name="cs_acc_create_session_file_exist_summary">We will open the file for you to edit.</string>
-    <string name="cs_acc_create_session_file_created_title">Script Created</string>
-    <string name="cs_acc_create_session_file_created_summary">Your script is saved.</string>
 
     <!-- Accessibility service text -->
     <string name="acc_description">AutoJob needs your accessibility permissions to receive screen content and perform touch gesture. Screenshots are sensitive data, we do not collect or save your data without your consent. Please refer to our privacy policy.</string>
     <string name="acc_summary">AutoJob service</string>
-    <string name="bugreport_context">Leave your feedback below</string>
-    <string name="snackbar_show_gl22">To start service, you will be navigated to Accessibility Setting page, please enable AutoJob</string>
     <string name="author_email" translatable="false">joshhsu@onegoodcreative.dev</string>
-    <string name="selectable_sapa_title">My Script</string>
-    <string name="selectable_sapa_error_no_xml">Error, script file could not be opened. Have you ever choose your script?</string>
-    <string name="sapa_timeout">Check Timeout</string>
-    <string name="sapa_see">Trig</string>
-    <string name="sapa_action">Do</string>
-    <string name="sapa_unsupport_title">Resolution unsupported</string>
-    <string name="sapa_unsupport_summary_1">You device resolution</string>
-    <string name="sapa_unsupport_summary_2"> is not supported, please use \n[ adb shell wm size </string>
-    <string name="sapa_unsupport_summary_2_2"> is not supported, this script is for </string>
-    <string name="sapa_unsupport_summary_3">  ]\nto adjust.\nMore information in tutorial webpage.</string>
-    <string name="sapa_exception_title">Script execution error</string>
-    <string name="sapa_exception_summary"> Routine caught an exception: </string>
-    <string name="sapa_security_exception_title">Security Error</string>
-    <string name="sapa_security_exception_summary">Your script is malformed, please select it or import it again. If you keep receiving this error, please report this bug using Issue Report.</string>
-    <string name="gl22_outline_select_xml">Select Downloaded Script File</string>
-    <string name="gl22_outline_select_job">Select Script Mode</string>
-    <string name="gl22_outline_create_xml">Switch to Create Script mode</string>
-    <string name="gl22_outline_execution_mode">Switch to Execution mode</string>
-    <string name="gl22_outline_help">Help / Instruction</string>
-    <string name="gl22_outline_my_script">My Scripts</string>
-    <string name="gl22_outline_no_script">No script selected</string>
-    <string name="gl22_outline_service_not_enabled">Please enable service first.</string>
-    <string name="gl22_outline_service_not_enabled_summary">Tap OK will navigate to accessibility service setting. Please enable AutoJob in there.</string>
-    <string name="acc_script_ended">Script Ended</string>
-    <string name="acc_opening">Opening ..</string>
-    <string name="rapid_modify_no_script">No Script selected, please select script in Script Manage first.</string>
-    <string name="acc_script_changed">Script changed\nPause execution</string>
 
 </resources>

@@ -10,14 +10,33 @@ import java.io.InputStreamReader;
 public class IntentPropertyImpl {
     private final static String INTENT_ACTION = "com.mumu.pokemongogo.action.SETPROP";
     private Context mContext;
+    String EXTRA_EN  = "enable";
+    String EXTRA_LAT = "lat";
+    String EXTRA_LNG = "lng";
+    String EXTRA_ALT = "alt";
+    String EXTRA_ACC = "acc";
+    String EXTRA_BER = "bear";
+    String EXTRA_SPD = "speed";
 
     public IntentPropertyImpl(Context context) {
         mContext = context;
     }
 
-    public void setSystemProperty(String intent_property, String value) {
+    public void sendIntentProperty(String intent_property, String value) {
         Intent intent = new Intent(INTENT_ACTION);
         intent.putExtra(intent_property, value);
+        mContext.sendBroadcast(intent);
+    }
+
+    public void sendLocation(String lat, String lng, String alt, String acc, String bear, String spd) {
+        Intent intent = new Intent(INTENT_ACTION);
+        intent.putExtra(EXTRA_EN, "1");
+        intent.putExtra(EXTRA_LAT, lat);
+        intent.putExtra(EXTRA_LNG, lng);
+        intent.putExtra(EXTRA_ALT, alt);
+        intent.putExtra(EXTRA_ACC, acc);
+        intent.putExtra(EXTRA_BER, bear);
+        intent.putExtra(EXTRA_SPD, spd);
         mContext.sendBroadcast(intent);
     }
 

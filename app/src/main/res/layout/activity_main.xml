@@ -47,7 +47,7 @@
             android:layout_marginTop="20dp"
             android:background="#c1d5e0"
             android:gravity="start|center_vertical"
-            android:text="@string/gl22_outline_select_job"
+            android:text="@string/home_activity_open_map"
             android:textAllCaps="false"
             android:textAppearance="@style/TextAppearance.AppCompat.Button"
             android:textColor="#FFFFFF"
@@ -58,14 +58,14 @@
             app:iconSize="36dp" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonSetting"
+            android:id="@+id/buttonStartServiceBtm"
             style="@style/Widget.MaterialComponents.Button.Icon"
             android:layout_width="match_parent"
             android:layout_height="72dp"
             android:layout_below="@+id/buttonMapView"
             android:background="#c1d5e0"
             android:gravity="start|center_vertical"
-            android:text="@string/gl22_outline_my_script"
+            android:text="@string/home_activity_start_service"
             android:textAllCaps="false"
             android:textAppearance="@style/TextAppearance.AppCompat.Button"
             android:textColor="#FFFFFF"

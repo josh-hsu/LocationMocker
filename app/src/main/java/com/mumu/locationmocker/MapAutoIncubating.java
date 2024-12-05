@@ -27,6 +27,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.mumu.locationmocker.location.FakeLocation;
 import com.mumu.locationmocker.location.FakeLocationManager;
+import com.mumu.locationmocker.service.HeadService;
 
 public class MapAutoIncubating extends AppCompatActivity
         implements
