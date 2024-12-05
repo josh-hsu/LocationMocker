@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
@@ -56,8 +57,8 @@ public class TopUIController {
     private static final int sTopViewLeftInsetDp = 24;
     private static final int sTopViewPositionY = 200;
     private static final float sTopViewAlpha = 0.75f;
-    private static final int sJoystickPositionX = 20;
-    private static final int sJoystickPositionY = 600;
+    private static final int sJoystickPositionX = 100;
+    private static final int sJoystickPositionY = 1600;
     private static final int mUpdateUIInterval = 100;
     private static final int mMessageLastTimeMs = 3000;
     private String mMessageText = "";
@@ -117,17 +118,20 @@ public class TopUIController {
                     WindowManager.LayoutParams.WRAP_CONTENT,
                     WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, // able to present in negative position
                     WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS |
-                            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                     PixelFormat.TRANSLUCENT);
             mJoystickParams.gravity = Gravity.TOP | Gravity.START;
             mJoystickParams.x = sJoystickPositionX;
             mJoystickParams.y = sJoystickPositionY;
-            mMainLayout.setAlpha(sTopViewAlpha);
+            mJoystickParams.width = 400;
+            mJoystickParams.height = 400;
 
-            mJoystickView = (JoystickView) mLayoutInflater.inflate(R.layout.top_ui_joystick, null);
-            mWindowManager.addView(mJoystickView, mJoystickParams);
+            mJoystickView = new JoystickView(mContext);
             mJoystickView.setJoystickListener(mIntentLocationManager);
             mJoystickView.setVisibility(View.INVISIBLE);
+
+            mWindowManager.addView(mJoystickView, mJoystickParams);
         }
     }
 
