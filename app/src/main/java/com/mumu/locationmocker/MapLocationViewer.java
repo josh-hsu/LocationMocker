@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2024 The Josh Tool Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.mumu.locationmocker;
 
 import androidx.annotation.NonNull;
@@ -31,7 +47,10 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.mumu.locationmocker.location.IntentLocationManager;
 import com.mumu.locationmocker.service.HeadService;
+
+import java.text.DecimalFormat;
 
 public class MapLocationViewer extends AppCompatActivity
         implements
@@ -44,9 +63,12 @@ public class MapLocationViewer extends AppCompatActivity
     private static final String TAG = "PokemonGoGo";
 
     private boolean mPermissionDenied = false;
+    private boolean mCameraTracking = true;
     private GoogleMap mMap;
     private LatLng mUserSelectPoint;
     private LongPressLocationSource mLocationSource;
+    private LocationManager mLocationManager;
+    private FusedLocationProviderClient mFusedLocationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,23 +125,71 @@ public class MapLocationViewer extends AppCompatActivity
                 finish();
             }
             return true;
+        } else if (id == R.id.action_camera_track) {
+            StringBuilder sb = new StringBuilder();
+
+            mCameraTracking = !mCameraTracking;
+            sb.append("Now ");
+            sb.append(mCameraTracking ? "will " : "will not ");
+            sb.append("tracking location in map camera viewport.");
+            Toast.makeText(this, sb.toString(), Toast.LENGTH_SHORT).show();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        if (mLocationManager != null) {
+            mLocationManager.removeUpdates(this);
+        }
+        if (mFusedLocationClient != null) {
+            mFusedLocationClient.removeLocationUpdates(mFusedLocationCallback);
+        }
+    }
+
+    private void printLocationLog(String tag, Location location) {
+        StringBuilder sb = new StringBuilder();
+        DecimalFormat df = new DecimalFormat("0.000000");
+        sb.append(tag);
+        sb.append(": ");
+        sb.append("<");
+        sb.append(df.format(location.getLatitude()));
+        sb.append(",");
+        sb.append(df.format(location.getLongitude()));
+        sb.append("> acc: ");
+        sb.append(df.format(location.getAccuracy()));
+        Log.d(TAG, sb.toString());
+    }
+
+    @Override
     public void onLocationChanged(Location location) {
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
-        Log.d(TAG, "Loc: Lat: " + latitude + ", Long: " + longitude);
+
+        IntentLocationManager ilm = AppSharedObject.get().getIntentLocationManager();
+        if (ilm != null && !ilm.hasOriginalLocation()) {
+            ilm.setOriginalLocation(location);
+        }
+        printLocationLog("Loc", location);
+
         LatLng latLng = new LatLng(latitude, longitude);
-        if (mMap != null) {
+        if (mMap != null && mCameraTracking) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
         }
-
     }
+
+    LocationCallback mFusedLocationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            for (Location location : locationResult.getLocations()) {
+                // Use location data
+                printLocationLog("Fus", location);
+            }
+        }
+    };
 
     @Override
     public void onProviderEnabled(String s) {
@@ -138,7 +208,7 @@ public class MapLocationViewer extends AppCompatActivity
     private class LongPressLocationSource implements GoogleMap.OnMapLongClickListener {
 
         @Override
-        public void onMapLongClick(LatLng point) {
+        public void onMapLongClick(@NonNull LatLng point) {
             if (point != null) {
                 Log.d(TAG, "User hit LAT = " + point.latitude + " and LONG = " + point.longitude);
                 mUserSelectPoint = point;
@@ -149,7 +219,7 @@ public class MapLocationViewer extends AppCompatActivity
     }
 
     @Override
-    public void onMapReady(GoogleMap map) {
+    public void onMapReady(@NonNull GoogleMap map) {
         mMap = map;
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMapLongClickListener(mLocationSource);
@@ -174,33 +244,33 @@ public class MapLocationViewer extends AppCompatActivity
     }
 
     private void enableLocationUpdate() {
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         Criteria criteria = new Criteria();
-        String bestProvider = locationManager.getBestProvider(criteria, true);
+        String bestProvider = mLocationManager.getBestProvider(criteria, true);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        Location location = locationManager.getLastKnownLocation(bestProvider);
+        Location location = mLocationManager.getLastKnownLocation(bestProvider);
         if (location != null) {
             onLocationChanged(location);
         }
-        locationManager.requestLocationUpdates(bestProvider, 2000, 0, this);
+        mLocationManager.requestLocationUpdates(bestProvider, 2000, 0, this);
     }
 
     private void enableFusedLocationUpdate() {
-        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        fusedLocationClient.getLastLocation()
+        mFusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, location -> {
                     if (location != null) {
                         // Use location data
                         double latitude = location.getLatitude();
                         double longitude = location.getLongitude();
-                        Log.d(TAG, "Fus: Lat: " + latitude + ", Long: " + longitude);
+                        printLocationLog("Fus", location);
                     } else {
                         Log.d(TAG, "No last known location available");
                     }
@@ -212,17 +282,8 @@ public class MapLocationViewer extends AppCompatActivity
         locationRequest.setInterval(2000); // 10 seconds
         locationRequest.setFastestInterval(1000); // 5 seconds
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        LocationCallback locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                for (Location location : locationResult.getLocations()) {
-                    // Use location data
-                    Log.d(TAG, "Fus: Lat: " + location.getLatitude() + ", Long: " + location.getLongitude());
-                }
-            }
-        };
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
 
+        mFusedLocationClient.requestLocationUpdates(locationRequest, mFusedLocationCallback, Looper.getMainLooper());
     }
 
     @Override

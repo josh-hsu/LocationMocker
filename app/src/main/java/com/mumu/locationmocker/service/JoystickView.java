@@ -1,10 +1,24 @@
+/*
+ * Copyright (C) 2024 The Josh Tool Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.mumu.locationmocker.service;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -30,15 +44,14 @@ public class JoystickView extends View {
 
     private void init() {
         paintBackground = new Paint();
-        paintBackground.setColor(Color.WHITE);
+        paintBackground.setColor(0xDDDDDD);
         paintBackground.setStyle(Paint.Style.FILL);
         paintBackground.setAlpha(150);
 
         paintHandle = new Paint();
-        paintHandle.setColor(Color.WHITE);
+        paintHandle.setColor(0xAAAAAA);
         paintHandle.setStyle(Paint.Style.FILL);
         paintHandle.setAlpha(200);
-
 
         lastReportTimestampMs = System.currentTimeMillis();
     }

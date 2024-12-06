@@ -27,7 +27,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
@@ -254,6 +253,9 @@ public class TopUIController {
      * Button actions
      */
     private void startJoystick(boolean show) {
+        if (show && !mIntentLocationManager.hasOriginalLocation()) {
+            startMapView();
+        }
         mJoystickView.setVisibility(show ? View.VISIBLE: View.INVISIBLE);
     }
 

@@ -32,6 +32,8 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 import com.google.android.gms.maps.model.LatLng;
+
+import com.mumu.locationmocker.AppSharedObject;
 import com.mumu.locationmocker.MainActivity;
 import com.mumu.locationmocker.R;
 import com.mumu.locationmocker.location.*;
@@ -111,6 +113,7 @@ public class HeadService extends Service {
 
     private void initOnce() {
         mIntentLocationManager = new IntentLocationManager(mContext);
+        AppSharedObject.get().setIntentLocationManager(mIntentLocationManager);
         mUIController = new TopUIController(mContext, this, mHandler, mIntentLocationManager);
         mUIController.initOnce();
 
@@ -134,7 +137,7 @@ public class HeadService extends Service {
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(mContext, NOTIFICATION_CHANNEL_ID);
         notification = notificationBuilder.setOngoing(true)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.mipmap.icon_tx)
                 .setContentTitle(getString(R.string.headservice_notification_title))
                 .setContentText(getString(R.string.headservice_notification_text))
                 .setPriority(NotificationManager.IMPORTANCE_HIGH)

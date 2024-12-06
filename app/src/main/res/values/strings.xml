@@ -20,10 +20,6 @@
     <string name="home_activity_open_map">Open Map</string>
 
     <!-- HeadService -->
-    <string name="walk_up_button">↑</string>
-    <string name="walk_down_button">↓</string>
-    <string name="walk_left_button">←</string>
-    <string name="walk_right_button">→</string>
     <string name="topui_inst_first_play">Play!</string>
     <string name="topui_inst_first_pause">Pause</string>
     <string name="topui_inst_second">Speed\nConfig</string>
@@ -48,6 +44,10 @@
     <string name="msg_map_shu">Shu ----- !!!!</string>
     <string name="msg_map_locating">Locating to your current location</string>
     <string name="msg_map_navi_done">Navigation completed</string>
+    <string name="map_action_desc_camera">Camera Focus</string>
+    <string name="map_action_desc_teleport">Teleport</string>
+    <string name="map_action_desc_finish">Finish</string>
+    <string name="map_action_desc_cancel">Cancel</string>
 
     <!-- Auto Incubating map view -->
     <string name="msg_map_drag_bar">Drag the bar to select incubating radius</string>
@@ -81,16 +81,6 @@
     <!-- Capture view -->
     <string name="capture_point_default_info">Tap screen to get color info</string>
     <string name="title_activity_battle_argument_dialog" translatable="false">BattleArgumentDialog</string>
-
-    <!-- Activity and Service text -->
-    <string name="broadcast_msg_action" translatable="false">Parcel_Broadcast_MSG</string>
-    <string name="broadcast_msg_body_extra" translatable="false">Parcel_Broadcast_MSG_BODY</string>
-    <string name="screen_capture_slot" translatable="false">SC_SLOT</string>
-    <string name="script_gl_error">Something wrong, please disable App in Settings then try it again.</string>
-
-    <!-- Create Script ACC Service -->
-    <string name="cs_acc_description">Auto Job Create Script needs your accessibility permissions to receive screen content to let you write your script. Screenshots are sensitive data, we do not collect or save your data without your consent. Please refer to our privacy policy.</string>
-    <string name="cs_acc_summary">Auto Job Create Script</string>
 
     <!-- Accessibility service text -->
     <string name="acc_description">AutoJob needs your accessibility permissions to receive screen content and perform touch gesture. Screenshots are sensitive data, we do not collect or save your data without your consent. Please refer to our privacy policy.</string>

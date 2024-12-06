@@ -2,24 +2,31 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_camera_track"
+        android:orderInCategory="100"
+        android:icon="@drawable/baseline_camera"
+        android:title="@string/map_action_desc_camera"
+        app:showAsAction="always"/>
+
+    <item
         android:id="@+id/action_teleport"
         android:orderInCategory="100"
         android:icon="@drawable/ic_map_teleport"
-        android:title="act_teleport"
-        app:showAsAction="ifRoom"/>
+        android:title="@string/map_action_desc_teleport"
+        app:showAsAction="always"/>
 
     <item
         android:id="@+id/action_finish"
         android:orderInCategory="100"
         android:icon="@drawable/ic_map_navigation"
-        android:title="act_finish"
-        app:showAsAction="ifRoom"/>
+        android:title="@string/map_action_desc_finish"
+        app:showAsAction="always"/>
 
     <item
         android:id="@+id/action_cancel"
         android:orderInCategory="100"
         android:icon="@drawable/ic_map_cancel"
-        android:title="act_cancel"
-        app:showAsAction="ifRoom"/>
+        android:title="@string/map_action_desc_cancel"
+        app:showAsAction="always"/>
 
 </menu>

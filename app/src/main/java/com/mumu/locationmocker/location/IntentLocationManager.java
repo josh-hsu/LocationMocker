@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2024 The Josh Tool Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.mumu.locationmocker.location;
 
 import android.content.Context;
@@ -17,6 +33,7 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
     private float  mCurrentAccuracy = 6.91f;
     private float  mCurrentBearing = 30.0f;
     private float  mCurrentSpeed = 0.3f;
+    private Location mOriginalLocation;
 
     private double mAutoLat = -1;
     private double mAutoLong = -1;
@@ -64,6 +81,14 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
         sendIntentLocation(mCurrentLat, mCurrentLong, mCurrentAlt, mCurrentAccuracy, mCurrentBearing, mCurrentSpeed);
     }
 
+    public void setOriginalLocation(Location location) {
+        mOriginalLocation = location;
+    }
+
+    public boolean hasOriginalLocation() {
+        return mOriginalLocation != null;
+    }
+
     private void controlRandomShift() {
         // shift is controlled to be within -0.000001 ~ 0.000001
         double shift = Math.random() / 1000000 - 0.0000005;
@@ -88,7 +113,6 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
             ratio = 1.0;
         }
 
-        Log.d(TAG, "x = " + x + ", y = " + y);
         double nextPace = (mPaceAmount + mPaceShift) * mPaceSpeed;
         mCurrentLat = mCurrentLat + nextPace * y;
         mCurrentLong = mCurrentLong + nextPace * x;

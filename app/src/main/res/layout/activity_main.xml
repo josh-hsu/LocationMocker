@@ -53,7 +53,7 @@
             android:textColor="#FFFFFF"
             android:textSize="16sp"
             app:cornerRadius="8sp"
-            app:icon="@drawable/baseline_library_books_24"
+            app:icon="@drawable/map_24px"
             app:iconPadding="10sp"
             app:iconSize="36dp" />
 
@@ -71,7 +71,7 @@
             android:textColor="#FFFFFF"
             android:textSize="16sp"
             app:cornerRadius="8sp"
-            app:icon="@drawable/baseline_folder_open_24"
+            app:icon="@drawable/ic_play"
             app:iconPadding="10sp"
             app:iconSize="36dp" />
 
