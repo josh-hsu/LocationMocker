@@ -323,7 +323,12 @@ public class TopUIController {
     }
 
     public void sendMessage(String msg) {
-        mMessageText = msg;
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                updateLogMessage(msg);
+            }
+        });
     }
 
     private void moveTopUIView() {

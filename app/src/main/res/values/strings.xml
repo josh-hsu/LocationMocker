@@ -33,8 +33,8 @@
     <string name="intent_alt">alt</string>
 
     <!-- Msg and Maps -->
-    <string name="msg_map_navigating">Receive map location, navigating..</string>
-    <string name="msg_map_teleporting">Receive map location, SHU --- !!!</string>
+    <string name="msg_map_navigating">Start navigating..</string>
+    <string name="msg_map_teleporting">GO GO SHU --- !!!</string>
     <string name="msg_start_incubating">Start Auto Incubating</string>
     <string name="msg_stop_incubating">Stop Auto Incubating</string>
     <string name="msg_stop_incubating_forcely">You are incubating, cancel first</string>

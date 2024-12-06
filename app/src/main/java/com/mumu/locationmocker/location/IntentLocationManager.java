@@ -25,7 +25,6 @@ import com.mumu.locationmocker.service.JoystickView;
 
 public class IntentLocationManager implements JoystickView.JoystickListener {
     private final String TAG = "PokemonGoGo";
-    private Context mContext;
     private IntentPropertyImpl mIntentPropImpl;
 
     private double mCurrentLat = 25.0335;
@@ -36,14 +35,13 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
     private float  mCurrentSpeed = 0.3f;
     private Location mOriginalLocation;
 
-    private double mAutoLat = -1;
-    private double mAutoLong = -1;
     private double mPaceAmount = 0.00007;
     private double mPaceShift = 0.000001;
     private double mPaceSpeed = 10;
 
+    private AutoPilot mAutoPilot;
+
     public IntentLocationManager(Context context) {
-        mContext = context;
         mIntentPropImpl = new IntentPropertyImpl(context);
     }
 
@@ -71,14 +69,29 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
 
     @Override
     public void onJoystickMoved(float xPercent, float yPercent) {
-        walkPace(0.5, xPercent, -yPercent);
+        walkPace(xPercent, -yPercent);
     }
 
     public void setPaceSpeed(double speed) {
         mPaceSpeed = speed;
+        if (mAutoPilot != null)
+            mAutoPilot.setPilotSpeed(speed);
     }
 
-    private void applyLocation() {
+    public void setPaceShift(double shift) {
+        mPaceShift = shift;
+    }
+
+    public void sendLocation(double lat, double lng) {
+        mCurrentLat = lat;
+        mCurrentLong = lng;
+    }
+
+    public LatLng getLocation() {
+        return new LatLng(mCurrentLat, mCurrentLong);
+    }
+
+    public void applyLocation() {
         sendIntentLocation(mCurrentLat, mCurrentLong, mCurrentAlt, mCurrentAccuracy, mCurrentBearing, mCurrentSpeed);
     }
 
@@ -110,15 +123,9 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
             mCurrentAccuracy = 5.2f;
     }
 
-    private void walkPace(double ratio, float x, float y) {
+    private void walkPace(float x, float y) {
         // must introduce random variable
         controlRandomShift();
-
-        // ratio must be within 0.0 ~ 1.0
-        if (ratio > 1.0 || ratio < 0.0) {
-            Log.e(TAG, "Unacceptable ratio " + ratio + " set to 1.0");
-            ratio = 1.0;
-        }
 
         double nextPace = (mPaceAmount + mPaceShift) * mPaceSpeed;
         mCurrentLat = mCurrentLat + nextPace * y;
@@ -132,8 +139,99 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
         applyLocation();
     }
 
-    public void navigateTo(LatLng latLng) {
+    public void navigateTo(LatLng latLng, OnNavigationCompleteListener l) {
+        OnNavigationCompleteListener autoPilotListener = new OnNavigationCompleteListener() {
+            @Override
+            public void onNavigationComplete() {
+                mAutoPilot = null;
+                l.onNavigationComplete();
+            }
+        };
 
+        if (mAutoPilot != null) {
+            mAutoPilot.cancelPilot();
+            mAutoPilot = null;
+        }
+
+        mAutoPilot = new AutoPilot(this, latLng, mPaceAmount, mPaceSpeed, autoPilotListener);
+        mAutoPilot.start();
     }
 
+    /*
+     * Auto Pilot Component
+     */
+    private class AutoPilot extends Thread {
+        boolean isAutoPilot = true;
+        double pace;
+        double paceSpeed;
+        double paceShift = 0.000001;
+        LatLng targetPosition;
+        IntentLocationManager ilm;
+        OnNavigationCompleteListener listener;
+
+        public AutoPilot(IntentLocationManager lm, LatLng target, double p, double spd, OnNavigationCompleteListener l) {
+            ilm = lm;
+            targetPosition = target;
+            pace = p;
+            paceSpeed = spd / 10;
+            listener = l;
+        }
+
+        private void sendAndApplyLocation(double lat, double lng) {
+            ilm.sendLocation(lat, lng);
+            ilm.applyLocation();
+        }
+
+        public void setPilotSpeed(double spd) {
+            paceSpeed = spd / 10;
+        }
+
+        public void cancelPilot() {
+            isAutoPilot = false;
+            interrupt();
+        }
+
+        @Override
+        public void run() {
+            Log.d(TAG, "Start auto piloting .. ");
+            double diffLat, diffLong, incrementLat, incrementLong;
+
+            while(isAutoPilot
+                    && !(Math.abs(ilm.getLocation().latitude - targetPosition.latitude) < pace)
+                    && !(Math.abs(ilm.getLocation().longitude - targetPosition.longitude) < pace)) {
+                double currentLat = ilm.getLocation().latitude;
+                double currentLng = ilm.getLocation().longitude;
+                diffLat = targetPosition.latitude - currentLat;
+                diffLong = targetPosition.longitude - currentLng;
+                incrementLat = (diffLat / (Math.abs(diffLong) + Math.abs(diffLat))) * (pace + paceShift) * paceSpeed;
+                incrementLong = (diffLong / (Math.abs(diffLong) + Math.abs(diffLat))) * (pace + paceShift) * paceSpeed;
+
+                if (Math.abs(incrementLat) > 2 * pace * paceSpeed ||
+                        Math.abs(incrementLong) > 2 * pace * paceSpeed) {
+                    Log.w(TAG, "Calculate next increment of lat or long too high, abort it");
+                    Log.w(TAG, "incrementLat = " + incrementLat + ", incrementLong = " + incrementLong);
+                    Log.w(TAG, "incrementLat bound = " + 2 * pace * paceSpeed + ", incrementLong bound = " + 2 * pace * paceSpeed);
+                    break;
+                }
+
+                sendAndApplyLocation(currentLat + incrementLat, currentLng + incrementLong);
+
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    break;
+                }
+            }
+
+            Log.d(TAG, "Auto pilot has sent you home.");
+            if (listener != null)
+                listener.onNavigationComplete();
+
+            isAutoPilot = false;
+        }
+    }
+
+    public interface OnNavigationCompleteListener {
+        void onNavigationComplete();
+    }
 }

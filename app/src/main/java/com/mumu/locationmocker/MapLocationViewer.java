@@ -63,7 +63,7 @@ public class MapLocationViewer extends AppCompatActivity
     private static final String TAG = "PokemonGoGo";
 
     private boolean mPermissionDenied = false;
-    private boolean mCameraTracking = true;
+    private boolean mCameraTracking = false;
     private GoogleMap mMap;
     private LatLng mUserSelectPoint;
     private LongPressLocationSource mLocationSource;

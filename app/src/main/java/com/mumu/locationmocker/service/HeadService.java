@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
@@ -80,15 +81,18 @@ public class HeadService extends Service {
         if (intent != null) {
             final String action = intent.getAction();
             if (action != null) {
-                //configHeadIconShowing(HeadIconView.VISIBLE);
-
                 switch (action) {
                     case ACTION_HANDLE_NAVIGATION:
                         mapLocation = intent.getParcelableExtra(EXTRA_DATA);
                         Log.d(TAG, "Service receive LAT = " + mapLocation.latitude + " and LONG = " + mapLocation.longitude);
                         mMapLocation = mapLocation;
                         mUIController.sendMessage(mContext.getString(R.string.msg_map_navigating));
-                        mIntentLocationManager.navigateTo(mMapLocation);
+                        mIntentLocationManager.navigateTo(mMapLocation, new IntentLocationManager.OnNavigationCompleteListener() {
+                            @Override
+                            public void onNavigationComplete() {
+                                 mUIController.sendMessage("Navigation Done!");
+                            }
+                        });
                         break;
                     case ACTION_HANDLE_TELEPORT:
                         mapLocation = intent.getParcelableExtra(EXTRA_DATA);
