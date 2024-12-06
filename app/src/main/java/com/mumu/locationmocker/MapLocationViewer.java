@@ -109,7 +109,6 @@ public class MapLocationViewer extends AppCompatActivity
             }
             return true;
         } else if (id == R.id.action_cancel) {
-            Toast.makeText(this, getString(R.string.msg_map_cancelled), Toast.LENGTH_SHORT).show();
             finish();
             return true;
         } else if (id == R.id.action_teleport) {

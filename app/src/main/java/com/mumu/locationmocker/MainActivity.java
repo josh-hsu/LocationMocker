@@ -15,6 +15,7 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.mumu.locationmocker.location.IntentPropertyImpl;
 import com.mumu.locationmocker.service.HeadService;
 
 public class MainActivity extends AppCompatActivity {
@@ -39,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
         Button mStartServiceButtonBtm;
         mStartServiceButtonBtm = findViewById(R.id.buttonStartServiceBtm);
         mStartServiceButtonBtm.setOnClickListener(view -> startChatHeadService());
+
+        Button mStopMockingButton;
+        mStopMockingButton = findViewById(R.id.buttonCancelMock);
+        mStopMockingButton.setOnClickListener(view -> stopMocking());
 
         requestPermissions();
     }
@@ -74,6 +79,11 @@ public class MainActivity extends AppCompatActivity {
             startService(new Intent(mContext, HeadService.class));
             returnHomeScreen();
         }
+    }
+
+    private void stopMocking() {
+        IntentPropertyImpl impl = new IntentPropertyImpl(this);
+        impl.sendMock("0");
     }
 
     @Override

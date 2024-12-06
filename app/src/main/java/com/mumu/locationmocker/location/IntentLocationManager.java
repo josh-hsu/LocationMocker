@@ -67,8 +67,15 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
         );
     }
 
+    public void sendMock(boolean enable) {
+        mIntentPropImpl.sendMock(enable ? "1" : "0");
+    }
+
     @Override
     public void onJoystickMoved(float xPercent, float yPercent) {
+        if (mAutoPilot != null) {
+            mAutoPilot.cancelPilot();
+        }
         walkPace(xPercent, -yPercent);
     }
 
@@ -166,6 +173,7 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
         double paceSpeed;
         double paceShift = 0.000001;
         LatLng targetPosition;
+        LatLng currentPosition;
         IntentLocationManager ilm;
         OnNavigationCompleteListener listener;
 
@@ -194,13 +202,18 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
         @Override
         public void run() {
             Log.d(TAG, "Start auto piloting .. ");
+            currentPosition = ilm.getLocation();
             double diffLat, diffLong, incrementLat, incrementLong;
 
-            while(isAutoPilot
-                    && !(Math.abs(ilm.getLocation().latitude - targetPosition.latitude) < pace)
-                    && !(Math.abs(ilm.getLocation().longitude - targetPosition.longitude) < pace)) {
-                double currentLat = ilm.getLocation().latitude;
-                double currentLng = ilm.getLocation().longitude;
+            while(isAutoPilot) {
+                double currentLat = currentPosition.latitude;
+                double currentLng = currentPosition.longitude;
+
+                if ((Math.abs(currentPosition.latitude - targetPosition.latitude) < pace)
+                        || (Math.abs(currentPosition.longitude - targetPosition.longitude) < pace)) {
+                    break;
+                }
+
                 diffLat = targetPosition.latitude - currentLat;
                 diffLong = targetPosition.longitude - currentLng;
                 incrementLat = (diffLat / (Math.abs(diffLong) + Math.abs(diffLat))) * (pace + paceShift) * paceSpeed;
@@ -215,6 +228,7 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
                 }
 
                 sendAndApplyLocation(currentLat + incrementLat, currentLng + incrementLong);
+                currentPosition = new LatLng(currentLat + incrementLat, currentLng + incrementLong);
 
                 try {
                     Thread.sleep(1000);

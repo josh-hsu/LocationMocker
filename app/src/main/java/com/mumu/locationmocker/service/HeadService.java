@@ -117,9 +117,11 @@ public class HeadService extends Service {
 
     private void initOnce() {
         mIntentLocationManager = new IntentLocationManager(mContext);
-        AppSharedObject.get().setIntentLocationManager(mIntentLocationManager);
         mUIController = new TopUIController(mContext, this, mHandler, mIntentLocationManager);
         mUIController.initOnce();
+
+        AppSharedObject.get().setIntentLocationManager(mIntentLocationManager);
+        AppSharedObject.get().setTopUIController(mUIController);
 
         initNotification();
     }

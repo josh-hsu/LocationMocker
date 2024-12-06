@@ -40,6 +40,12 @@ public class IntentPropertyImpl {
         mContext.sendBroadcast(intent);
     }
 
+    public void sendMock(String enable) {
+        Intent intent = new Intent(INTENT_ACTION);
+        intent.putExtra(EXTRA_EN, enable);
+        mContext.sendBroadcast(intent);
+    }
+
     public static String getSystemProperty(String property) {
         return runCommand("getprop " + property);
     }

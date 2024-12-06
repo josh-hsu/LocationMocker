@@ -18,6 +18,7 @@
     <!-- Activity -->
     <string name="home_activity_start_service">Start Service</string>
     <string name="home_activity_open_map">Open Map</string>
+    <string name="home_activity_stop_mock">Stop Mocking</string>
 
     <!-- HeadService -->
     <string name="topui_inst_first_play">Play!</string>
