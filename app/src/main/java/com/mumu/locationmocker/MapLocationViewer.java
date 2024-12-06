@@ -106,7 +106,6 @@ public class MapLocationViewer extends AppCompatActivity
                 intent.setAction(HeadService.ACTION_HANDLE_NAVIGATION);
                 intent.putExtra(HeadService.EXTRA_DATA, mUserSelectPoint);
                 startService(intent);
-                finish();
             }
             return true;
         } else if (id == R.id.action_cancel) {
@@ -122,7 +121,6 @@ public class MapLocationViewer extends AppCompatActivity
                 intent.setAction(HeadService.ACTION_HANDLE_TELEPORT);
                 intent.putExtra(HeadService.EXTRA_DATA, mUserSelectPoint);
                 startService(intent);
-                finish();
             }
             return true;
         } else if (id == R.id.action_camera_track) {
@@ -209,12 +207,10 @@ public class MapLocationViewer extends AppCompatActivity
 
         @Override
         public void onMapLongClick(@NonNull LatLng point) {
-            if (point != null) {
-                Log.d(TAG, "User hit LAT = " + point.latitude + " and LONG = " + point.longitude);
-                mUserSelectPoint = point;
-                mMap.clear();
-                mMap.addMarker(new MarkerOptions().position(mUserSelectPoint).title("Marker"));
-            }
+            Log.d(TAG, "User hit LAT = " + point.latitude + " and LONG = " + point.longitude);
+            mUserSelectPoint = point;
+            mMap.clear();
+            mMap.addMarker(new MarkerOptions().position(mUserSelectPoint).title("Marker"));
         }
     }
 

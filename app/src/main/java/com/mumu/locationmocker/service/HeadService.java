@@ -87,21 +87,21 @@ public class HeadService extends Service {
                         mapLocation = intent.getParcelableExtra(EXTRA_DATA);
                         Log.d(TAG, "Service receive LAT = " + mapLocation.latitude + " and LONG = " + mapLocation.longitude);
                         mMapLocation = mapLocation;
-                        //mMessageText = mContext.getString(R.string.msg_map_navigating);
-                        //doMapNavigation();
+                        mUIController.sendMessage(mContext.getString(R.string.msg_map_navigating));
+                        mIntentLocationManager.navigateTo(mMapLocation);
                         break;
                     case ACTION_HANDLE_TELEPORT:
                         mapLocation = intent.getParcelableExtra(EXTRA_DATA);
                         Log.d(TAG, "Service receive LAT = " + mapLocation.latitude + " and LONG = " + mapLocation.longitude);
                         mMapLocation = mapLocation;
-                        //mMessageText = mContext.getString(R.string.msg_map_teleporting);
-                        //doMapTeleporting();
+                        mUIController.sendMessage(mContext.getString(R.string.msg_map_teleporting));
+                        mIntentLocationManager.teleportTo(mMapLocation);
                         break;
                     case ACTION_HANDLE_INCUBATING:
                         mapRadius = intent.getDoubleExtra(EXTRA_DATA, 50.0);
                         Log.d(TAG, "Service receive Radius = " + mapRadius);
                         //mAutoIncubatingRadius = mapRadius;
-                        //mMessageText = mContext.getString(R.string.msg_start_incubating);
+                        mUIController.sendMessage(mContext.getString(R.string.msg_map_shu));
                         //mAutoIncubating = true;
                         //startAutoIncubating();
                         break;

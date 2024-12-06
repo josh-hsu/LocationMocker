@@ -20,6 +20,7 @@ import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.mumu.locationmocker.service.JoystickView;
 
 public class IntentLocationManager implements JoystickView.JoystickListener {
@@ -117,6 +118,16 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
         mCurrentLat = mCurrentLat + nextPace * y;
         mCurrentLong = mCurrentLong + nextPace * x;
         applyLocation();
+    }
+
+    public void teleportTo(LatLng latLng) {
+        mCurrentLat = latLng.latitude;
+        mCurrentLong = latLng.longitude;
+        applyLocation();
+    }
+
+    public void navigateTo(LatLng latLng) {
+
     }
 
 }

@@ -322,6 +322,10 @@ public class TopUIController {
         mMessageTimestamp = System.currentTimeMillis();
     }
 
+    public void sendMessage(String msg) {
+        mMessageText = msg;
+    }
+
     private void moveTopUIView() {
         if (mMainLayoutParams != null && mMainLayout != null) {
             mMainLayoutPositionIndex = (mMainLayoutPositionIndex + 1) % 2;
