@@ -84,6 +84,12 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
 
     public void setOriginalLocation(Location location) {
         mOriginalLocation = location;
+        mCurrentLat = location.getLatitude();
+        mCurrentLong = location.getLongitude();
+        mCurrentAlt = location.getAltitude();
+        mCurrentAccuracy = location.getAccuracy();
+        mCurrentBearing = location.getBearing();
+        mCurrentSpeed = location.getSpeed();
     }
 
     public boolean hasOriginalLocation() {
