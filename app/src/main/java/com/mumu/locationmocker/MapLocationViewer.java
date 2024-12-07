@@ -23,11 +23,11 @@ import androidx.core.app.ActivityCompat;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
@@ -57,30 +57,35 @@ public class MapLocationViewer extends AppCompatActivity
         OnMyLocationButtonClickListener,
         OnMapReadyCallback,
         LocationListener,
+        IntentLocationManager.MockLocationListener,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final String TAG = "PokemonGoGo";
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     private boolean mPermissionDenied = false;
     private boolean mCameraTracking = false;
     private GoogleMap mMap;
     private LatLng mUserSelectPoint;
-    private LongPressLocationSource mLocationSource;
+    private LongPressLocationSource mLongPressLocationSource;
     private LocationManager mLocationManager;
     private FusedLocationProviderClient mFusedLocationClient;
+
+    private int mMapMockLocationMarker = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_location_viewer);
 
-        mLocationSource = new LongPressLocationSource();
+        mLongPressLocationSource = new LongPressLocationSource();
         mUserSelectPoint = null;
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        if (mapFragment != null)
+            mapFragment.getMapAsync(this);
     }
 
     @Override
@@ -136,6 +141,12 @@ public class MapLocationViewer extends AppCompatActivity
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        registerMockLocationListener();
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         if (mLocationManager != null) {
@@ -144,20 +155,20 @@ public class MapLocationViewer extends AppCompatActivity
         if (mFusedLocationClient != null) {
             mFusedLocationClient.removeLocationUpdates(mFusedLocationCallback);
         }
+        removeMockLocationListener();
     }
 
     private void printLocationLog(String tag, Location location) {
-        StringBuilder sb = new StringBuilder();
         DecimalFormat df = new DecimalFormat("0.000000");
-        sb.append(tag);
-        sb.append(": ");
-        sb.append("<");
-        sb.append(df.format(location.getLatitude()));
-        sb.append(",");
-        sb.append(df.format(location.getLongitude()));
-        sb.append("> acc: ");
-        sb.append(df.format(location.getAccuracy()));
-        Log.d(TAG, sb.toString());
+        String sb = tag +
+                ": " +
+                "<" +
+                df.format(location.getLatitude()) +
+                "," +
+                df.format(location.getLongitude()) +
+                "> acc: " +
+                df.format(location.getAccuracy());
+        Log.d(TAG, sb);
     }
 
     @Override
@@ -189,13 +200,41 @@ public class MapLocationViewer extends AppCompatActivity
     };
 
     @Override
-    public void onProviderEnabled(String s) {
+    public void onProviderEnabled(@NonNull String s) {
 
     }
 
     @Override
-    public void onProviderDisabled(String s) {
+    public void onProviderDisabled(@NonNull String s) {
 
+    }
+
+    public void registerMockLocationListener() {
+        IntentLocationManager ilm = AppSharedObject.get().getIntentLocationManager();
+        if (ilm != null) {
+            ilm.setMockListener(this);
+        }
+    }
+
+    public void removeMockLocationListener() {
+        IntentLocationManager ilm = AppSharedObject.get().getIntentLocationManager();
+        if (ilm != null) {
+            ilm.removeMockListener();
+        }
+    }
+
+    @Override
+    public void onMockLocation(LatLng location) {
+        mHandler.post(() -> {
+            if (mMap != null) {
+                if (mMapMockLocationMarker > 10) {
+                    mMapMockLocationMarker = 0;
+                    mMap.clear();
+                }
+                mMapMockLocationMarker++;
+                mMap.addMarker(new MarkerOptions().position(location).title("Mock"));
+            }
+        });
     }
 
     /**
@@ -203,7 +242,6 @@ public class MapLocationViewer extends AppCompatActivity
      * at the point at which a user long pressed the map.
      */
     private class LongPressLocationSource implements GoogleMap.OnMapLongClickListener {
-
         @Override
         public void onMapLongClick(@NonNull LatLng point) {
             Log.d(TAG, "User hit LAT = " + point.latitude + " and LONG = " + point.longitude);
@@ -217,7 +255,7 @@ public class MapLocationViewer extends AppCompatActivity
     public void onMapReady(@NonNull GoogleMap map) {
         mMap = map;
         mMap.setOnMyLocationButtonClickListener(this);
-        mMap.setOnMapLongClickListener(mLocationSource);
+        mMap.setOnMapLongClickListener(mLongPressLocationSource);
 
         enableLocationUpdate();
         enableFusedLocationUpdate();
@@ -240,8 +278,7 @@ public class MapLocationViewer extends AppCompatActivity
 
     private void enableLocationUpdate() {
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        Criteria criteria = new Criteria();
-        String bestProvider = mLocationManager.getBestProvider(criteria, true);
+        String bestProvider = LocationManager.GPS_PROVIDER;
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -250,7 +287,7 @@ public class MapLocationViewer extends AppCompatActivity
         if (location != null) {
             onLocationChanged(location);
         }
-        mLocationManager.requestLocationUpdates(bestProvider, 2000, 0, this);
+        mLocationManager.requestLocationUpdates(bestProvider, 1000, 0, this);
     }
 
     private void enableFusedLocationUpdate() {
@@ -262,21 +299,15 @@ public class MapLocationViewer extends AppCompatActivity
         mFusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, location -> {
                     if (location != null) {
-                        // Use location data
-                        double latitude = location.getLatitude();
-                        double longitude = location.getLongitude();
                         printLocationLog("Fus", location);
                     } else {
                         Log.d(TAG, "No last known location available");
                     }
                 })
-                .addOnFailureListener(e -> {
-                    Log.e("FusedLocation", "Failed to get location: " + e.getMessage());
-                });
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setInterval(2000); // 10 seconds
-        locationRequest.setFastestInterval(1000); // 5 seconds
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                .addOnFailureListener(e -> Log.e("FusedLocation", "Failed to get location: " + e.getMessage()));
+        LocationRequest locationRequest = new LocationRequest.Builder(
+                2000).
+                setIntervalMillis(0).build();
 
         mFusedLocationClient.requestLocationUpdates(locationRequest, mFusedLocationCallback, Looper.getMainLooper());
     }

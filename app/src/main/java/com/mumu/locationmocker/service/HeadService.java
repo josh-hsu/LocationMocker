@@ -24,11 +24,11 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
@@ -49,9 +49,10 @@ public class HeadService extends Service {
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private Context mContext;
     private TopUIController mUIController;
+    private RealLocationTracker mRealLocationTracker;
     private IntentLocationManager mIntentLocationManager;
 
-    private LatLng mMapLocation;
+    private boolean mMonitorLocationFlag = false;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -70,6 +71,9 @@ public class HeadService extends Service {
     public void onDestroy() {
         if (mUIController != null)
             mUIController.destroy();
+        if (mRealLocationTracker != null)
+            mRealLocationTracker.stopListening();
+        stopMonitorLocation();
         super.onDestroy();
     }
 
@@ -84,30 +88,27 @@ public class HeadService extends Service {
                 switch (action) {
                     case ACTION_HANDLE_NAVIGATION:
                         mapLocation = intent.getParcelableExtra(EXTRA_DATA);
-                        Log.d(TAG, "Service receive LAT = " + mapLocation.latitude + " and LONG = " + mapLocation.longitude);
-                        mMapLocation = mapLocation;
-                        mUIController.sendMessage(mContext.getString(R.string.msg_map_navigating));
-                        mIntentLocationManager.navigateTo(mMapLocation, new IntentLocationManager.OnNavigationCompleteListener() {
-                            @Override
-                            public void onNavigationComplete() {
-                                 mUIController.sendMessage("Navigation Done!");
-                            }
-                        });
+                        if (mapLocation != null) {
+                            Log.d(TAG, "Service receive LAT = " + mapLocation.latitude + " and LONG = " + mapLocation.longitude);
+                            mUIController.sendMessage(mContext.getString(R.string.msg_map_navigating));
+                            mIntentLocationManager.navigateTo(mapLocation, () ->
+                                    mUIController.sendMessage("Navigation Done!"));
+                        }
                         break;
                     case ACTION_HANDLE_TELEPORT:
                         mapLocation = intent.getParcelableExtra(EXTRA_DATA);
-                        Log.d(TAG, "Service receive LAT = " + mapLocation.latitude + " and LONG = " + mapLocation.longitude);
-                        mMapLocation = mapLocation;
-                        mUIController.sendMessage(mContext.getString(R.string.msg_map_teleporting));
-                        mIntentLocationManager.teleportTo(mMapLocation);
+                        if (mapLocation != null) {
+                            Log.d(TAG, "Service receive LAT = " + mapLocation.latitude + " and LONG = " + mapLocation.longitude);
+                            mUIController.sendMessage(mContext.getString(R.string.msg_map_teleporting));
+                            mIntentLocationManager.teleportTo(mapLocation);
+                        }
                         break;
                     case ACTION_HANDLE_INCUBATING:
                         mapRadius = intent.getDoubleExtra(EXTRA_DATA, 50.0);
-                        Log.d(TAG, "Service receive Radius = " + mapRadius);
-                        //mAutoIncubatingRadius = mapRadius;
-                        mUIController.sendMessage(mContext.getString(R.string.msg_map_shu));
-                        //mAutoIncubating = true;
-                        //startAutoIncubating();
+                        if (mapRadius > 0) {
+                            Log.d(TAG, "Service receive Radius = " + mapRadius);
+                            mUIController.sendMessage(mContext.getString(R.string.msg_map_shu));
+                        }
                         break;
                 }
             }
@@ -119,11 +120,53 @@ public class HeadService extends Service {
         mIntentLocationManager = new IntentLocationManager(mContext);
         mUIController = new TopUIController(mContext, this, mHandler, mIntentLocationManager);
         mUIController.initOnce();
+        mRealLocationTracker = new RealLocationTracker(mContext);
+        mRealLocationTracker.startListening();
 
         AppSharedObject.get().setIntentLocationManager(mIntentLocationManager);
         AppSharedObject.get().setTopUIController(mUIController);
 
         initNotification();
+        startMonitorLocation();
+    }
+
+    private void monitorWorkFunc() {
+        String gpsString = "GPS: ", fusedString = "FUS: ";
+        Location location;
+
+        location = mRealLocationTracker.getLastGpsLocation();
+        if (location != null) {
+            gpsString += mRealLocationTracker.getLocationString(location);
+            gpsString += " ";
+            gpsString += mRealLocationTracker.getLastGpsLocationElapsedTimeStr();
+            gpsString += " s ago";
+        }
+
+        location = mRealLocationTracker.getLastFusedLocation();
+        if (location != null) {
+            fusedString += mRealLocationTracker.getLocationString(location);
+            fusedString += " ";
+            fusedString += mRealLocationTracker.getLastFusedLocationElapsedTimeStr();
+            fusedString += " s ago";
+        }
+
+        mUIController.sendMessage(gpsString + "\n" + fusedString);
+        if (mMonitorLocationFlag)
+            startMonitorLocation();
+    }
+
+    private void startMonitorLocation() {
+        mMonitorLocationFlag = true;
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                monitorWorkFunc();
+            }
+        }, 500);
+    }
+
+    private void stopMonitorLocation() {
+        mMonitorLocationFlag = false;
     }
 
     private void initNotification() {

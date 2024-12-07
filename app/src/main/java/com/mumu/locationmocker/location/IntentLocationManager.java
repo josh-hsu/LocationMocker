@@ -25,7 +25,7 @@ import com.mumu.locationmocker.service.JoystickView;
 
 public class IntentLocationManager implements JoystickView.JoystickListener {
     private final String TAG = "PokemonGoGo";
-    private IntentPropertyImpl mIntentPropImpl;
+    private final IntentPropertyImpl mIntentPropImpl;
 
     private double mCurrentLat = 25.0335;
     private double mCurrentLong = 121.5642;
@@ -40,6 +40,7 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
     private double mPaceSpeed = 10;
 
     private AutoPilot mAutoPilot;
+    private MockLocationListener mMockListenerClient;
 
     public IntentLocationManager(Context context) {
         mIntentPropImpl = new IntentPropertyImpl(context);
@@ -100,6 +101,9 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
 
     public void applyLocation() {
         sendIntentLocation(mCurrentLat, mCurrentLong, mCurrentAlt, mCurrentAccuracy, mCurrentBearing, mCurrentSpeed);
+        if (mMockListenerClient != null) {
+            mMockListenerClient.onMockLocation(new LatLng(mCurrentLat, mCurrentLong));
+        }
     }
 
     public void setOriginalLocation(Location location) {
@@ -110,6 +114,14 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
         mCurrentAccuracy = location.getAccuracy();
         mCurrentBearing = location.getBearing();
         mCurrentSpeed = location.getSpeed();
+    }
+
+    public void setMockListener(MockLocationListener listener) {
+        mMockListenerClient = listener;
+    }
+
+    public void removeMockListener() {
+        mMockListenerClient = null;
     }
 
     public boolean hasOriginalLocation() {
@@ -216,8 +228,9 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
 
                 diffLat = targetPosition.latitude - currentLat;
                 diffLong = targetPosition.longitude - currentLng;
-                incrementLat = (diffLat / (Math.abs(diffLong) + Math.abs(diffLat))) * (pace + paceShift) * paceSpeed;
-                incrementLong = (diffLong / (Math.abs(diffLong) + Math.abs(diffLat))) * (pace + paceShift) * paceSpeed;
+                double normalizeAmount = (Math.abs(diffLong) + Math.abs(diffLat));
+                incrementLat = (diffLat / normalizeAmount) * (pace + paceShift) * paceSpeed;
+                incrementLong = (diffLong / normalizeAmount) * (pace + paceShift) * paceSpeed;
 
                 if (Math.abs(incrementLat) > 2 * pace * paceSpeed ||
                         Math.abs(incrementLong) > 2 * pace * paceSpeed) {
@@ -247,5 +260,9 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
 
     public interface OnNavigationCompleteListener {
         void onNavigationComplete();
+    }
+
+    public interface MockLocationListener {
+        void onMockLocation(LatLng location);
     }
 }

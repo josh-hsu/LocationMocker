@@ -19,14 +19,12 @@ package com.mumu.locationmocker.service;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 
 public class JoystickView extends View {
-    private static final String TAG = "JoystickView";
     private Paint paintBackground;
     private Paint paintHandle;
     private float centerX, centerY; // Joystick center
@@ -87,11 +85,7 @@ public class JoystickView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                Log.d(TAG, "ACTION_DOWN");
-                return false;
             case MotionEvent.ACTION_MOVE:
-                Log.d(TAG, "ACTION_MOVE");
                 float dx = event.getX() - centerX;
                 float dy = event.getY() - centerY;
                 float distance = (float) Math.sqrt(dx * dx + dy * dy);
@@ -116,7 +110,6 @@ public class JoystickView extends View {
                 return true;
 
             case MotionEvent.ACTION_UP:
-                Log.d(TAG, "ACTION_UP");
                 handleX = centerX;
                 handleY = centerY;
 

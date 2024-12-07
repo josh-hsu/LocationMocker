@@ -11,6 +11,7 @@ public class IntentPropertyImpl {
     private final static String INTENT_ACTION = "com.mumu.pokemongogo.action.SETPROP";
     private Context mContext;
     String EXTRA_EN  = "enable";
+    String EXTRA_DBG = "debug";
     String EXTRA_LAT = "lat";
     String EXTRA_LNG = "lng";
     String EXTRA_ALT = "alt";
@@ -43,6 +44,12 @@ public class IntentPropertyImpl {
     public void sendMock(String enable) {
         Intent intent = new Intent(INTENT_ACTION);
         intent.putExtra(EXTRA_EN, enable);
+        mContext.sendBroadcast(intent);
+    }
+
+    public void enableDebugFlag(String enable) {
+        Intent intent = new Intent(INTENT_ACTION);
+        intent.putExtra(EXTRA_DBG, enable);
         mContext.sendBroadcast(intent);
     }
 

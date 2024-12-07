@@ -45,6 +45,10 @@ public class MainActivity extends AppCompatActivity {
         mStopMockingButton = findViewById(R.id.buttonCancelMock);
         mStopMockingButton.setOnClickListener(view -> stopMocking());
 
+        Button mEnableDebugButton;
+        mEnableDebugButton = findViewById(R.id.buttonEnableDebug);
+        mEnableDebugButton.setOnClickListener(view -> enableDebugFlag());
+
         requestPermissions();
     }
 
@@ -84,6 +88,11 @@ public class MainActivity extends AppCompatActivity {
     private void stopMocking() {
         IntentPropertyImpl impl = new IntentPropertyImpl(this);
         impl.sendMock("0");
+    }
+
+    private void enableDebugFlag() {
+        IntentPropertyImpl impl = new IntentPropertyImpl(this);
+        impl.enableDebugFlag("1");
     }
 
     @Override
