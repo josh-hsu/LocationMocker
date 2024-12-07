@@ -49,8 +49,8 @@ public class TopUIController {
     private ScrollView mTopUIScrollView;
     private TopUIView mHandleBarView;
     private TopUIView mTimerTextView, mMsgTextView;
-    private TopUIView mFirstButton, mSecondButton, mThirdButton;
-    private TopUIView mFirstText, mSecondText, mThirdText;
+    private TopUIView mFirstButton, mSecondButton, mThirdButton, mFourthButton;
+    private TopUIView mFirstText, mSecondText, mThirdText, mFourthText;
     private JoystickView mJoystickView;
 
     private static final int sTopViewLeftInsetDp = 24;
@@ -74,6 +74,7 @@ public class TopUIController {
     public static final int BUTTON_FIRST_STATE_PLAYING = 1;
     public static final int BUTTON_SECOND_STATE_SPEED_CONFIG = 0;
     public static final int BUTTON_THIRD_STATE_OPEN_MAP = 0;
+    public static final int BUTTON_FOURTH_STATE_NORMAL = 0;
 
     private int mCurrentSpeedIndex = 0;
     private final int[] mSpeedResArray = new int[] {
@@ -215,9 +216,21 @@ public class TopUIController {
                     }
                 });
 
+        // 4th button
+        mFourthButton = new TopUIView(findViewById(R.id.button_fourth), TopUIView.VIEW_TYPE_BUTTON);
+        mFourthButton.setViewStateAction(BUTTON_FOURTH_STATE_NORMAL,
+                R.drawable.ic_egg_disabled,
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                });
+
         mFirstText = new TopUIView(findViewById(R.id.textview_inst_first), TopUIView.VIEW_TYPE_TEXTVIEW);
         mSecondText = new TopUIView(findViewById(R.id.textview_inst_second), TopUIView.VIEW_TYPE_TEXTVIEW);
         mThirdText = new TopUIView(findViewById(R.id.textview_inst_third), TopUIView.VIEW_TYPE_TEXTVIEW);
+        mFourthText = new TopUIView(findViewById(R.id.textview_inst_fourth), TopUIView.VIEW_TYPE_TEXTVIEW);
 
         mWindowManager.addView(mMainLayout, mMainLayoutParams);
 
@@ -279,11 +292,12 @@ public class TopUIController {
     }
 
     private void iconVisible(boolean[] visible) {
-        if (visible.length == 4) {
+        if (visible.length == 5) {
             mFirstButton.setVisible(visible[0]);
             mSecondButton.setVisible(visible[1]);
-            mThirdButton.setVisible(visible[2]);
-            mTimerTextView.setVisible(visible[3]);
+            mTimerTextView.setVisible(visible[2]);
+            mThirdButton.setVisible(visible[3]);
+            mFourthButton.setVisible(visible[4]);
         } else {
             Log.e(TAG, "iconVisible size error: " + visible.length);
         }
@@ -295,13 +309,14 @@ public class TopUIController {
                 showBarView(false);
                 break;
             case EXECUTION_MODE_NORMAL:
-                iconVisible(new boolean[] {true, true, true, true});
+                iconVisible(new boolean[] {true, true, true, true, true});
                 mFirstButton.setState(BUTTON_FIRST_STATE_PAUSED);
                 mSecondButton.setState(BUTTON_SECOND_STATE_SPEED_CONFIG);
                 mThirdButton.setState(BUTTON_THIRD_STATE_OPEN_MAP);
                 mFirstText.showInstruction(mHandler, getString(R.string.topui_inst_first_play));
                 mSecondText.showInstruction(mHandler, getString(R.string.topui_inst_second));
                 mThirdText.showInstruction(mHandler, getString(R.string.topui_inst_third));
+                mFourthText.showInstruction(mHandler, getString(R.string.topui_inst_fourth));
                 showBarView(true);
                 break;
             default:

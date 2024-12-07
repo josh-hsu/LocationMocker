@@ -131,13 +131,13 @@ public class HeadService extends Service {
     }
 
     private void monitorWorkFunc() {
-        String gpsString = "GPS: ", fusedString = "FUS: ";
+        String gpsString = "GPS: (", fusedString = "FUS: (";
         Location location;
 
         location = mRealLocationTracker.getLastGpsLocation();
         if (location != null) {
             gpsString += mRealLocationTracker.getLocationString(location);
-            gpsString += " ";
+            gpsString += ") ";
             gpsString += mRealLocationTracker.getLastGpsLocationElapsedTimeStr();
             gpsString += " s ago";
         }
@@ -145,7 +145,7 @@ public class HeadService extends Service {
         location = mRealLocationTracker.getLastFusedLocation();
         if (location != null) {
             fusedString += mRealLocationTracker.getLocationString(location);
-            fusedString += " ";
+            fusedString += ") ";
             fusedString += mRealLocationTracker.getLastFusedLocationElapsedTimeStr();
             fusedString += " s ago";
         }

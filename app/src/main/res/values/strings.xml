@@ -26,6 +26,7 @@
     <string name="topui_inst_first_pause">Pause</string>
     <string name="topui_inst_second">Speed\nConfig</string>
     <string name="topui_inst_third">Open\nMap</string>
+    <string name="topui_inst_fourth">Debug\nFeat.</string>
 
     <!-- Intent properties -->
     <string name="intent_enable">enable</string>
