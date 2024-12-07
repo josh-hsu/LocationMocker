@@ -16,17 +16,21 @@
 
 package com.mumu.locationmocker.service;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.media.Image;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
@@ -44,7 +48,7 @@ public class TopUIController {
     private LayoutInflater mLayoutInflater;
 
     private WindowManager.LayoutParams mMainLayoutParams;
-    private WindowManager.LayoutParams mJoystickParams;
+    private WindowManager.LayoutParams mJoystickParams, mJoystickMoverParams;
     private RelativeLayout mMainLayout;
     private ScrollView mTopUIScrollView;
     private TopUIView mHandleBarView;
@@ -52,6 +56,7 @@ public class TopUIController {
     private TopUIView mFirstButton, mSecondButton, mThirdButton, mFourthButton;
     private TopUIView mFirstText, mSecondText, mThirdText, mFourthText;
     private JoystickView mJoystickView;
+    private ImageView mJoystickMoverView;
 
     private static final int sTopViewLeftInsetDp = 24;
     private static final int sTopViewPositionY = 200;
@@ -130,9 +135,78 @@ public class TopUIController {
             mJoystickView = new JoystickView(mContext);
             mJoystickView.setJoystickListener(mIntentLocationManager);
             mJoystickView.setVisibility(View.INVISIBLE);
+            mJoystickView.setReportInterval(250);
 
             mWindowManager.addView(mJoystickView, mJoystickParams);
         }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void initJoystickMover() {
+        int alignmentDp = 32;
+        int moverSizeDp = 96;
+        mJoystickMoverView = new ImageView(mContext);
+        mJoystickMoverView.setImageResource(R.drawable.drag_pan_24px);
+
+        mJoystickMoverParams = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, // able to present in negative position
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS |
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT);
+        mJoystickMoverParams.gravity = Gravity.TOP | Gravity.START;
+        mJoystickMoverParams.x = sJoystickPositionX + alignmentDp;
+        mJoystickMoverParams.y = sJoystickPositionY + alignmentDp;
+        mJoystickMoverParams.width = moverSizeDp;
+        mJoystickMoverParams.height = moverSizeDp;
+
+        mWindowManager.addView(mJoystickMoverView, mJoystickMoverParams);
+
+        mJoystickMoverView.setOnTouchListener(new View.OnTouchListener() {
+            private int lastAction;
+            private int initialX, initialY;
+            private float initialTouchX, initialTouchY;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        // Remember the initial position
+                        initialX = mJoystickParams.x;
+                        initialY = mJoystickParams.y;
+
+                        // Remember the touch position
+                        initialTouchX = event.getRawX();
+                        initialTouchY = event.getRawY();
+                        lastAction = event.getAction();
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        // Calculate the new position
+                        mJoystickParams.x = initialX + (int) (event.getRawX() - initialTouchX);
+                        mJoystickParams.y = initialY + (int) (event.getRawY() - initialTouchY);
+                        mJoystickMoverParams.x = initialX + (int) (event.getRawX() - initialTouchX) + alignmentDp;
+                        mJoystickMoverParams.y = initialY + (int) (event.getRawY() - initialTouchY) + alignmentDp;
+
+                        // Update the view position
+                        mWindowManager.updateViewLayout(mJoystickMoverView, mJoystickMoverParams);
+                        mWindowManager.updateViewLayout(mJoystickView, mJoystickParams);
+                        lastAction = event.getAction();
+                        return true;
+
+                    case MotionEvent.ACTION_UP:
+                        // Perform click if it's a tap
+                        if (lastAction == MotionEvent.ACTION_DOWN) {
+                            v.performClick();
+                        }
+                        lastAction = event.getAction();
+                        return true;
+                }
+                return false;
+            }
+        });
     }
 
     private void initTopUIs() {
@@ -235,6 +309,7 @@ public class TopUIController {
         mWindowManager.addView(mMainLayout, mMainLayoutParams);
 
         initJoystick();
+        initJoystickMover();
 
         iconTransition(EXECUTION_MODE_NORMAL);
         updateLogMessage("");
@@ -270,6 +345,7 @@ public class TopUIController {
             startMapView();
         }
         mJoystickView.setVisibility(show ? View.VISIBLE: View.INVISIBLE);
+        mJoystickMoverView.setVisibility(show ? View.VISIBLE: View.INVISIBLE);
     }
 
     private void changeSpeed() {
