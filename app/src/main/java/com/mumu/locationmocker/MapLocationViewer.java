@@ -62,6 +62,7 @@ public class MapLocationViewer extends AppCompatActivity
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final String TAG = "PokemonGoGo";
+    private final boolean mEnableVerbose = false;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     private boolean mPermissionDenied = false;
@@ -168,7 +169,8 @@ public class MapLocationViewer extends AppCompatActivity
                 df.format(location.getLongitude()) +
                 "> acc: " +
                 df.format(location.getAccuracy());
-        Log.d(TAG, sb);
+        if (mEnableVerbose)
+            Log.d(TAG, sb);
     }
 
     @Override

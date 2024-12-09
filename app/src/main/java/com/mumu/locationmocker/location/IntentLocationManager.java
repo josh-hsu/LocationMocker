@@ -35,8 +35,8 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
     private float  mCurrentSpeed = 0.3f;
     private Location mOriginalLocation;
 
-    private double mPaceAmount = 0.00007;
-    private double mPaceShift = 0.000001;
+    private double mPaceAmount = 0.000002;
+    private double mPaceShift = 0.0000001;
     private double mPaceSpeed = 10;
 
     private AutoPilot mAutoPilot;
@@ -130,13 +130,13 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
 
     private void controlRandomShift() {
         // shift is controlled to be within -0.000001 ~ 0.000001
-        double shift = Math.random() / 1000000 - 0.0000005;
+        double shift = Math.random() / 10000000 - 0.00000005;
         float accShift = (float) (Math.random() * 2 - 1);
-        mPaceAmount = mPaceShift + shift;
+        mPaceShift = mPaceShift + shift;
         mCurrentAccuracy += accShift;
 
-        if (mPaceAmount > 0.000002 || mPaceAmount < -0.000002)
-            mPaceAmount = 0.000001;
+        if (mPaceShift > 0.0000002 || mPaceShift < -0.0000002)
+            mPaceShift = 0.0000001;
 
         if (mCurrentAccuracy > 9.9f || mCurrentAccuracy < 1.5f)
             mCurrentAccuracy = 5.2f;
@@ -159,12 +159,10 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
     }
 
     public void navigateTo(LatLng latLng, OnNavigationCompleteListener l) {
-        OnNavigationCompleteListener autoPilotListener = new OnNavigationCompleteListener() {
-            @Override
-            public void onNavigationComplete() {
-                mAutoPilot = null;
-                l.onNavigationComplete();
-            }
+        OnNavigationCompleteListener autoPilotListener = () -> {
+            Log.d(TAG, "receive navigation done. unset pilot");
+            mAutoPilot = null;
+            l.onNavigationComplete();
         };
 
         if (mAutoPilot != null) {
@@ -173,7 +171,7 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
         }
 
         mAutoPilot = new AutoPilot(this, latLng, mPaceAmount, mPaceSpeed, autoPilotListener);
-        mAutoPilot.start();
+        mAutoPilot.startPilot();
     }
 
     /*
@@ -193,7 +191,7 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
             ilm = lm;
             targetPosition = target;
             pace = p;
-            paceSpeed = spd / 10;
+            paceSpeed = spd;
             listener = l;
         }
 
@@ -203,7 +201,12 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
         }
 
         public void setPilotSpeed(double spd) {
-            paceSpeed = spd / 10;
+            paceSpeed = spd;
+        }
+
+        public void startPilot() {
+            isAutoPilot = true;
+            start();
         }
 
         public void cancelPilot() {
@@ -213,9 +216,11 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
 
         @Override
         public void run() {
-            Log.d(TAG, "Start auto piloting .. ");
             currentPosition = ilm.getLocation();
-            double diffLat, diffLong, incrementLat, incrementLong;
+            double diffLat, diffLng, incLat, incLng;
+
+            Log.d(TAG, "Start auto piloting from <" + currentPosition.latitude + "," + currentPosition.longitude + "> to <" +
+                    targetPosition.latitude + "," + targetPosition.longitude + ">");
 
             while(isAutoPilot) {
                 double currentLat = currentPosition.latitude;
@@ -227,21 +232,21 @@ public class IntentLocationManager implements JoystickView.JoystickListener {
                 }
 
                 diffLat = targetPosition.latitude - currentLat;
-                diffLong = targetPosition.longitude - currentLng;
-                double normalizeAmount = (Math.abs(diffLong) + Math.abs(diffLat));
-                incrementLat = (diffLat / normalizeAmount) * (pace + paceShift) * paceSpeed;
-                incrementLong = (diffLong / normalizeAmount) * (pace + paceShift) * paceSpeed;
+                diffLng = targetPosition.longitude - currentLng;
+                double normalizeAmount = (Math.abs(diffLng) + Math.abs(diffLat));
+                incLat = (diffLat / normalizeAmount) * (pace + paceShift) * paceSpeed;
+                incLng = (diffLng / normalizeAmount) * (pace + paceShift) * paceSpeed;
 
-                if (Math.abs(incrementLat) > 2 * pace * paceSpeed ||
-                        Math.abs(incrementLong) > 2 * pace * paceSpeed) {
+                if (Math.abs(incLat) > 2 * pace * paceSpeed ||
+                        Math.abs(incLng) > 2 * pace * paceSpeed) {
                     Log.w(TAG, "Calculate next increment of lat or long too high, abort it");
-                    Log.w(TAG, "incrementLat = " + incrementLat + ", incrementLong = " + incrementLong);
+                    Log.w(TAG, "incrementLat = " + incLat + ", incrementLong = " + incLng);
                     Log.w(TAG, "incrementLat bound = " + 2 * pace * paceSpeed + ", incrementLong bound = " + 2 * pace * paceSpeed);
                     break;
                 }
 
-                sendAndApplyLocation(currentLat + incrementLat, currentLng + incrementLong);
-                currentPosition = new LatLng(currentLat + incrementLat, currentLng + incrementLong);
+                sendAndApplyLocation(currentLat + incLat, currentLng + incLng);
+                currentPosition = new LatLng(currentLat + incLat, currentLng + incLng);
 
                 try {
                     Thread.sleep(1000);

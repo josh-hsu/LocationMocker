@@ -25,6 +25,7 @@ import java.text.DecimalFormat;
 
 public class RealLocationTracker implements LocationListener {
     private final String TAG = "PokemonGoGo";
+    private final boolean mEnableVerbose = false;
 
     private final Context mContext;
     private final LocationManager mLocationManager;
@@ -96,7 +97,8 @@ public class RealLocationTracker implements LocationListener {
                 df.format(location.getLongitude()) +
                 "> acc: " +
                 df.format(location.getAccuracy());
-        Log.d(TAG, sb);
+        if (mEnableVerbose)
+            Log.d(TAG, sb);
     }
 
     public String getLocationString(Location location) {

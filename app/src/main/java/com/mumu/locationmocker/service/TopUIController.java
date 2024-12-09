@@ -90,7 +90,7 @@ public class TopUIController {
             R.drawable.ic_five,
             R.drawable.ic_six};
     private final double[] mSpeedValueArray = new double[] {
-            10.0f, 20.0f, 40.0f, 80.0f, 300.0f, 1000.0f
+            1.0f, 2.0f, 4.0f, 8.0f, 32.0f, 128.0f
     };
 
     protected TopUIController(Context context, Service service, Handler handler, IntentLocationManager ilm) {
@@ -135,7 +135,7 @@ public class TopUIController {
             mJoystickView = new JoystickView(mContext);
             mJoystickView.setJoystickListener(mIntentLocationManager);
             mJoystickView.setVisibility(View.INVISIBLE);
-            mJoystickView.setReportInterval(250);
+            mJoystickView.setReportInterval(500);
 
             mWindowManager.addView(mJoystickView, mJoystickParams);
         }
