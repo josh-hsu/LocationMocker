@@ -256,6 +256,9 @@ public class MapLocationViewer extends AppCompatActivity
         mMap = map;
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMapLongClickListener(mLongPressLocationSource);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(25.0335, 121.5642), 15
+        ));
 
         enableLocationUpdate();
         enableFusedLocationUpdate();

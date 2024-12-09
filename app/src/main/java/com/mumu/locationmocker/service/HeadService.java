@@ -132,6 +132,7 @@ public class HeadService extends Service {
 
     private void monitorWorkFunc() {
         String gpsString = "GPS: (", fusedString = "FUS: (";
+        String lastCbString = "";
         Location location;
 
         location = mRealLocationTracker.getLastGpsLocation();
@@ -140,6 +141,15 @@ public class HeadService extends Service {
             gpsString += ") ";
             gpsString += mRealLocationTracker.getLastGpsLocationElapsedTimeStr();
             gpsString += " s ago";
+            lastCbString += "GPS cb: " + (mRealLocationTracker.getLastGpsLocationCallbackTimeMs()/1000) + " s ago";
+        }
+
+        if (mRealLocationTracker.getLastGpsLocationElapsedTimeMs() > 3000) {
+            mUIController.setBackgroundColorWarm();
+        } else if (mRealLocationTracker.getLastGpsLocationElapsedTimeMs() > 1500) {
+            mUIController.setBackgroundColorFaking();
+        } else {
+            mUIController.resetBackgroundColor();
         }
 
         location = mRealLocationTracker.getLastFusedLocation();
@@ -148,9 +158,10 @@ public class HeadService extends Service {
             fusedString += ") ";
             fusedString += mRealLocationTracker.getLastFusedLocationElapsedTimeStr();
             fusedString += " s ago";
+            lastCbString += ", FUS cb: " + (mRealLocationTracker.getLastFusedLocationCallbackTimeMs()/1000) + " s ago";
         }
 
-        mUIController.sendMessage(gpsString + "\n" + fusedString);
+        mUIController.sendMessage(gpsString + "\n" + fusedString + "\n" + lastCbString);
         if (mMonitorLocationFlag)
             startMonitorLocation();
     }

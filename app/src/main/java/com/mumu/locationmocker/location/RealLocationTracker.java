@@ -36,12 +36,15 @@ public class RealLocationTracker implements LocationListener {
                 // Use location data
                 printLocationLog("Fus", location);
                 mFusedLocation = location;
+                mFusedCallbackTime = System.currentTimeMillis();
             }
         }
     };
 
     private Location mGpsLocation;
     private Location mFusedLocation;
+    private long mGpsCallbackTime;
+    private long mFusedCallbackTime;
 
     public RealLocationTracker(Context context) {
         mContext = context;
@@ -57,6 +60,7 @@ public class RealLocationTracker implements LocationListener {
         }
         printLocationLog("Loc", location);
         mGpsLocation = location;
+        mGpsCallbackTime = System.currentTimeMillis();
     }
 
     public void startListening() {
@@ -110,6 +114,12 @@ public class RealLocationTracker implements LocationListener {
         return System.currentTimeMillis() - mGpsLocation.getTime();
     }
 
+    public long getLastGpsLocationCallbackTimeMs() {
+        if (mGpsLocation == null)
+            return 0;
+        return System.currentTimeMillis() - mGpsCallbackTime;
+    }
+
     public String getLastGpsLocationElapsedTimeStr() {
         DecimalFormat df = new DecimalFormat("0.0");
         return df.format((getLastGpsLocationElapsedTimeMs() / 1000));
@@ -128,5 +138,11 @@ public class RealLocationTracker implements LocationListener {
     public String getLastFusedLocationElapsedTimeStr() {
         DecimalFormat df = new DecimalFormat("0.0");
         return df.format((getLastFusedLocationElapsedTimeMs() / 1000));
+    }
+
+    public long getLastFusedLocationCallbackTimeMs() {
+        if (mFusedLocation == null)
+            return 0;
+        return System.currentTimeMillis() - mFusedCallbackTime;
     }
 }

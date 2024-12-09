@@ -430,6 +430,18 @@ public class TopUIController {
         }
     }
 
+    public void setBackgroundColorWarm() {
+        mMainLayout.setBackgroundResource(R.drawable.rounded_bg_layout_warm);
+    }
+
+    public void setBackgroundColorFaking() {
+        mMainLayout.setBackgroundResource(R.drawable.rounded_bg_layout_faking);
+    }
+
+    public void resetBackgroundColor() {
+        mMainLayout.setBackgroundResource(R.drawable.rounded_bg_layout);
+    }
+
     private class GetMessageThread extends Thread {
         public void run() {
             while(mMessageThreadRunning) {
