@@ -1,0 +1,412 @@
+From 29def4e04e82324853574a9238a603a99449ceb7 Mon Sep 17 00:00:00 2001
+From: josh_hsu <josh_hsu@asus.com>
+Date: Mon, 9 Dec 2024 14:58:58 +0800
+Subject: [PATCH] josh fake location pokemongogo A15 version
+
+Change-Id: I79133db61dd756e2591b2d96aa16679345cf2e26
+---
+ .../com/android/server/JoshProperties.java    | 122 ++++++++++++++++++
+ .../server/am/ActivityManagerService.java     |  70 ++++++++++
+ .../location/gnss/GnssLocationProvider.java   |  92 +++++++++++++
+ .../provider/LocationProviderManager.java     |  25 +++-
+ 4 files changed, 308 insertions(+), 1 deletion(-)
+ create mode 100644 services/core/java/com/android/server/JoshProperties.java
+
+diff --git a/services/core/java/com/android/server/JoshProperties.java b/services/core/java/com/android/server/JoshProperties.java
+new file mode 100644
+index 000000000000..e0851f5dd880
+--- /dev/null
++++ b/services/core/java/com/android/server/JoshProperties.java
+@@ -0,0 +1,122 @@
++/*
++ * Josh Property in system_server process context
++ */
++package com.android.server;
++
++import android.location.Location;
++import android.os.SystemProperties;
++import android.util.Log;
++
++public class JoshProperties {
++    private static JoshProperties mCurrent = null;
++    public static String mLatitude = "25.0335";
++    public static String mLongitude = "121.5642";
++    public static String mAltitude = "10.2";
++
++    public static String mAccuracy = "2.5";
++    public static String mBearing = "0.0";
++    public static String mSpeed = "0.0";
++
++    public static boolean mEnabled = false;
++    public static int mReportRateMs = 2000;
++    public static int mDebugFlag = 0;
++    public static Location mRealLocation;
++
++    public static JoshProperties get() {
++        if (mCurrent == null)
++            mCurrent = new JoshProperties();
++
++        return mCurrent;
++    }
++
++    public void setRealLocation(Location loc) {
++        mRealLocation = loc;
++    }
++
++    public Location getRealLocation() {
++        return mRealLocation;
++    }
++
++    public void setLatitude(String val) {
++        mLatitude = val;
++    }
++
++    public double getLatitude() {
++        return Double.parseDouble(mLatitude);
++    }
++
++    public void setLongitude(String val) {
++        mLongitude = val;
++    }
++
++    public double getLongitude() {
++        return Double.parseDouble(mLongitude);
++    }
++
++    public void setAltitude(String val) {
++        mAltitude = val;
++    }
++
++    public double getAltitude() {
++        return Double.parseDouble(mAltitude);
++    }
++
++    public void setAccuracy(String val) {
++        mAccuracy = val;
++    }
++
++    public float getAccuracy() {
++        return Float.parseFloat(mAccuracy);
++    }
++
++    public void setBearing(String val) {
++        mBearing = val;
++    }
++
++    public float getBearing() {
++        return Float.parseFloat(mBearing);
++    }
++
++    public void setSpeed(String val) {
++        mSpeed = val;
++    }
++
++    public float getSpeed() {
++        return Float.parseFloat(mSpeed);
++    }
++
++    public void setEnable(String val) {
++        mEnabled = val.equals("1");
++    }
++
++    public boolean getEnable() {
++        return mEnabled;
++    }
++
++    public void setDebugFlag(String val) {
++        mDebugFlag = Integer.parseInt(val);
++    }
++
++    public int getDebugFlag() {
++        return mDebugFlag;
++    }
++
++    public void setReportRateMs(String val) {
++        mReportRateMs = Integer.parseInt(val);
++    }
++
++    public int getReportRateMs() {
++        return mReportRateMs;
++    }
++
++    // initialize default location
++    private JoshProperties() {
++        Log.d("JoshProperties", "initialize with Lat " + mLatitude + ", Lng = " + mLongitude
++                + ", Acc = " + mAccuracy + ", Alt = " + mAltitude);
++    }
++
++    public String toString() {
++        return "JoshProperties Enabled = " + mEnabled + ", Lat = " + mLatitude + ", Lng = " + mLongitude
++                + ", Acc = " + mAccuracy + ", Alt = " + mAltitude;
++    }
++}
+diff --git a/services/core/java/com/android/server/am/ActivityManagerService.java b/services/core/java/com/android/server/am/ActivityManagerService.java
+index ae8d7adfade5..0fdb37042eff 100755
+--- a/services/core/java/com/android/server/am/ActivityManagerService.java
++++ b/services/core/java/com/android/server/am/ActivityManagerService.java
+@@ -558,6 +558,8 @@ import android.os.SystemMonitorInternal;
+ import static com.android.internal.backup.AsusTransport.TRANSPORT_NAME;
+ // END
+ 
++import com.android.server.JoshProperties;
++
+ public class ActivityManagerService extends IActivityManager.Stub
+         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback, ActivityManagerGlobalLock {
+ 
+@@ -15957,6 +15959,70 @@ public class ActivityManagerService extends IActivityManager.Stub
+         }
+     }
+ 
++    //Josh: location mocker: ++++
++    private void processIntentHacked(Intent intent) {
++        String PROP_ACTION = "com.mumu.pokemongogo.action.SETPROP";
++        String JOSH_TAG = "PokemonJosh";
++        String EXTRA_EN  = "enable";
++        String EXTRA_LAT = "lat";
++        String EXTRA_LNG = "lng";
++        String EXTRA_ALT = "alt";
++        String EXTRA_ACC = "acc";
++        String EXTRA_BER = "bear";
++        String EXTRA_SPD = "speed";
++        String EXTRA_RPR = "report_rate";
++        String EXTRA_DEBUG = "debug";
++
++        if (intent.getAction().equals(PROP_ACTION)) {
++            Log.d(JOSH_TAG, "receive josh property");
++            if (intent.hasExtra(EXTRA_EN)) {
++                JoshProperties.get().setEnable(intent.getStringExtra(EXTRA_EN));
++                Log.d(JOSH_TAG, "Receive enable: " + intent.getStringExtra(EXTRA_EN));
++            }
++
++            if (intent.hasExtra(EXTRA_LAT)) {
++                JoshProperties.get().setLatitude(intent.getStringExtra(EXTRA_LAT));
++                Log.d(JOSH_TAG, "Receive lat: " + intent.getStringExtra(EXTRA_LAT));
++            }
++
++            if (intent.hasExtra(EXTRA_LNG)) {
++                JoshProperties.get().setLongitude(intent.getStringExtra(EXTRA_LNG));
++                Log.d(JOSH_TAG, "Receive lng: " + intent.getStringExtra(EXTRA_LNG));
++            }
++
++            if (intent.hasExtra(EXTRA_ALT)) {
++                JoshProperties.get().setAltitude(intent.getStringExtra(EXTRA_ALT));
++                Log.d(JOSH_TAG, "Receive alt: " + intent.getStringExtra(EXTRA_ALT));
++            }
++
++            if (intent.hasExtra(EXTRA_ACC)) {
++                JoshProperties.get().setAccuracy(intent.getStringExtra(EXTRA_ACC));
++                Log.d(JOSH_TAG, "Receive acc: " + intent.getStringExtra(EXTRA_ACC));
++            }
++
++            if (intent.hasExtra(EXTRA_BER)) {
++                JoshProperties.get().setBearing(intent.getStringExtra(EXTRA_BER));
++                Log.d(JOSH_TAG, "Receive bearing: " + intent.getStringExtra(EXTRA_BER));
++            }
++
++            if (intent.hasExtra(EXTRA_SPD)) {
++                JoshProperties.get().setSpeed(intent.getStringExtra(EXTRA_SPD));
++                Log.d(JOSH_TAG, "Receive speed: " + intent.getStringExtra(EXTRA_SPD));
++            }
++
++            if (intent.hasExtra(EXTRA_DEBUG)) {
++                JoshProperties.get().setDebugFlag(intent.getStringExtra(EXTRA_DEBUG));
++                Log.d(JOSH_TAG, "Receive debug: " + intent.getStringExtra(EXTRA_DEBUG));
++            }
++
++            if (intent.hasExtra(EXTRA_RPR)) {
++                JoshProperties.get().setReportRateMs(intent.getStringExtra(EXTRA_RPR));
++                Log.d(JOSH_TAG, "Receive report rate: " + intent.getStringExtra(EXTRA_RPR));
++            }
++        }
++    }
++    //Josh: location mocker: ----
++
+     @GuardedBy("this")
+     final int broadcastIntentLockedTraced(ProcessRecord callerApp, String callerPackage,
+             @Nullable String callerFeatureId, Intent intent, String resolvedType,
+@@ -16013,6 +16079,10 @@ public class ActivityManagerService extends IActivityManager.Stub
+                 broadcastAllowList = new int[]{};
+         }
+ 
++        //Josh: location mocker: ++++
++        processIntentHacked(intent);
++        //Josh: location mocker: ----
++
+         // By default broadcasts do not go to stopped apps.
+         intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+ 
+diff --git a/services/core/java/com/android/server/location/gnss/GnssLocationProvider.java b/services/core/java/com/android/server/location/gnss/GnssLocationProvider.java
+index d1a19e6e118a..3554f0810f47 100644
+--- a/services/core/java/com/android/server/location/gnss/GnssLocationProvider.java
++++ b/services/core/java/com/android/server/location/gnss/GnssLocationProvider.java
+@@ -140,6 +140,11 @@ import java.util.Set;
+ import java.util.concurrent.Executors;
+ import java.util.concurrent.TimeUnit;
+ 
++//Josh: location mocker: ++++
++import java.util.List;
++import com.android.server.JoshProperties;
++//Josh: location mocker: ----
++
+ /**
+  * A GNSS implementation of LocationProvider used by LocationManager.
+  *
+@@ -160,6 +165,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
+     private static final boolean VERBOSE = (Log.isLoggable(TAG, Log.VERBOSE) || USERDEBUG_GPS_PROP);
+     //ASUS_BSP Add condition to enable/disable gps logs ---
+ 
++    //ASUS_BSP PokemonGoGo +++
++    private JoshPropertiesLocationReport mJoshPropertiesLocationReport;
++    //ASUS_BSP PokemonGoGo ---
++
+     private static final ProviderProperties PROPERTIES = new ProviderProperties.Builder()
+                 .setHasSatelliteRequirement(true)
+                 .setHasAltitudeSupport(true)
+@@ -504,6 +513,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
+         mGnssNative.setNotificationCallbacks(this);
+         mGnssNative.setLocationRequestCallbacks(this);
+         mGnssNative.setTimeCallbacks(this);
++
++        //Josh: location mocker: ++++
++        mJoshPropertiesLocationReport = new JoshPropertiesLocationReport(3000);
++        mJoshPropertiesLocationReport.startCheckThread();
++        //Josh: location mocker: ----
+     }
+ 
+     /** Called when system is ready. */
+@@ -1784,6 +1798,17 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
+ 
+     @Override
+     public void onReportLocation(boolean hasLatLong, Location location) {
++        Log.d("PokemonJosh", "GNSS single lat: " + location.getLatitude() + ", long: " + location.getLongitude());
++        if (JoshProperties.get().getEnable()) {
++            location.setLatitude(JoshProperties.get().getLatitude());
++            location.setLongitude(JoshProperties.get().getLongitude());
++            location.setAltitude(JoshProperties.get().getAltitude());
++            location.setAccuracy(JoshProperties.get().getAccuracy());
++            location.setBearing(JoshProperties.get().getBearing());
++            location.setSpeed(JoshProperties.get().getSpeed());
++        }
++        Log.d("PokemonJosh", "GNSS   to   lat: " + location.getLatitude() + ", long: " + location.getLongitude());
++        mJoshPropertiesLocationReport.onLocationReported(location);
+         postWithWakeLockHeld(() -> handleReportLocation(hasLatLong, location));
+     }
+ 
+@@ -1927,4 +1952,71 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
+                 otherProtocolStackName, requestor, requestorId, responseType, inEmergencyMode,
+                 isCachedLocation);
+     }
++
++    //Josh: location mocker: ++++
++    private class JoshPropertiesLocationReport extends Thread {
++        private boolean enabled;
++        private int minReportRateMs = 2000; // if no real report in 3s, we will report it manually
++        private long lastRealUpdateTimestamp = 0;
++        private int checkIntervalMs = 500;
++        private Location lastLocationReported;
++
++        public JoshPropertiesLocationReport(int reportMs) {
++            lastRealUpdateTimestamp = System.currentTimeMillis();
++            minReportRateMs = reportMs;
++        }
++
++        public boolean getEnabled() {
++            return enabled;
++        }
++
++        public void startCheckThread() {
++            enabled = true;
++            start();
++        }
++
++        public void stopCheckThread() {
++            enabled = false;
++            interrupt();
++        }
++
++        public void onLocationReported(Location location) {
++            lastRealUpdateTimestamp = location.getTime();
++            lastLocationReported = location;
++        }
++
++        private void injectLocation() {
++            if (lastLocationReported != null) {
++                Log.d("PokemonJosh", "trigger reporting");
++                lastLocationReported.setTime(System.currentTimeMillis());
++                lastLocationReported.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
++                onReportLocation(true, lastLocationReported);
++            } else {
++                // there is no real report, dangerous!
++            }
++        }
++
++        public void run() {
++            Log.d("PokemonJosh", "location report thread has started");
++            while(enabled) {
++                long currentTimestamp = System.currentTimeMillis();
++                if (currentTimestamp - lastRealUpdateTimestamp > minReportRateMs) {
++                    injectLocation();
++                }
++                try {
++                    Thread.sleep(checkIntervalMs);
++                } catch (InterruptedException e) {
++                    // interrupted, stop running
++                    enabled = false;
++                }
++                if (minReportRateMs != JoshProperties.get().getReportRateMs()) {
++                    Log.d("PokemonJosh", "location report rate has changed " + minReportRateMs +
++                            " -> " + JoshProperties.get().getReportRateMs());
++                    minReportRateMs = JoshProperties.get().getReportRateMs();
++                }
++            }
++            Log.d("PokemonJosh", "location report thread has stopped");
++        }
++    }
++    //Josh: location mocker: ----
+ }
+diff --git a/services/core/java/com/android/server/location/provider/LocationProviderManager.java b/services/core/java/com/android/server/location/provider/LocationProviderManager.java
+index 30642e87e34b..46909c9a71e7 100644
+--- a/services/core/java/com/android/server/location/provider/LocationProviderManager.java
++++ b/services/core/java/com/android/server/location/provider/LocationProviderManager.java
+@@ -144,6 +144,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
+ import java.util.concurrent.Executor;
+ import java.util.function.Predicate;
+ 
++//Josh: location mocker: ++++
++import java.util.List;
++import com.android.server.JoshProperties;
++//Josh: location mocker: ----
++
+ /**
+  * Manages all aspects of a single location provider.
+  */
+@@ -218,7 +223,25 @@ public class LocationProviderManager extends
+         public void deliverOnLocationChanged(LocationResult locationResult,
+                 @Nullable IRemoteCallback onCompleteCallback) throws RemoteException {
+             try {
+-                mListener.onLocationChanged(locationResult.asList(), onCompleteCallback);
++                //Josh: location mocker: ++++
++                List<Location> locations = locationResult.asList();
++                boolean hookOnChanged = JoshProperties.get().getEnable();
++                int debugFlag = JoshProperties.get().getDebugFlag();
++                if (hookOnChanged && locations.size() > 0) {
++                    JoshProperties.get().setRealLocation(locations.get(0));
++                    locations.get(0).setLatitude(JoshProperties.get().getLatitude());
++                    locations.get(0).setLongitude(JoshProperties.get().getLongitude());
++                    locations.get(0).setAltitude(JoshProperties.get().getAltitude());
++                    locations.get(0).setAccuracy(JoshProperties.get().getAccuracy());
++                    locations.get(0).setBearing(JoshProperties.get().getBearing());
++                    locations.get(0).setSpeed(JoshProperties.get().getSpeed());
++                    if (locations.size() > 1) {
++                        locations.subList(1, locations.size()).clear();
++                    }
++                }
++                Log.d("PokemonJosh", "time: " + locations.get(0).getTime());
++                mListener.onLocationChanged(locations, onCompleteCallback);
++                //Josh: location mocker: ----
+             } catch (RuntimeException e) {
+                 // the only way a runtime exception can be thrown here is if the client is in the
+                 // system server process (so that the binder call is executed directly, rather than
+-- 
+2.34.1
+
